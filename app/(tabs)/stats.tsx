@@ -1,27 +1,17 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Surface } from 'react-native-paper';
-import { CartesianChart, Bar } from 'victory-native';
 import { useStats } from '../../hooks/useStats';
 import { useProfileStore } from '../../store/profileStore';
 import { StreakDisplay } from '../../components/stats/StreakDisplay';
+import { WeeklyBarChart } from '../../components/stats/WeeklyBarChart';
 import { XPBar } from '../../components/gamification/XPBar';
 import { CoinDisplay } from '../../components/gamification/CoinDisplay';
-
-const { width } = Dimensions.get('window');
 
 export default function StatsScreen() {
   const { weekly, streak } = useStats();
   const { profile } = useProfileStore();
-
-  const chartData = weekly?.days.map((d, i) => ({
-    day: new Date(d.date).toLocaleDateString('ja-JP', { weekday: 'short' }),
-    hours: Math.round((d.minutes / 60) * 10) / 10,
-    index: i,
-  })) ?? [];
-
-  const hasData = chartData.some((d) => d.hours > 0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -50,24 +40,8 @@ export default function StatsScreen() {
         {weekly && (
           <Surface style={styles.card}>
             <Text variant="titleSmall" style={styles.sectionTitle}>今週の学習時間（時間）</Text>
-            {hasData ? (
-              <View style={{ height: 180, width: width - 64 }}>
-                <CartesianChart
-                  data={chartData}
-                  xKey="day"
-                  yKeys={['hours']}
-                  domainPadding={{ left: 20, right: 20 }}
-                >
-                  {({ points, chartBounds }) => (
-                    <Bar
-                      points={points.hours}
-                      chartBounds={chartBounds}
-                      color="#6366f1"
-                      roundedCorners={{ topLeft: 4, topRight: 4 }}
-                    />
-                  )}
-                </CartesianChart>
-              </View>
+            {weekly.days.some((d) => d.minutes > 0) ? (
+              <WeeklyBarChart days={weekly.days} />
             ) : (
               <Text style={styles.noData}>今週の学習記録はまだありません</Text>
             )}
