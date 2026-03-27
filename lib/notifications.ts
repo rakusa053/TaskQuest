@@ -10,8 +10,6 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
   }),
 });
 
@@ -31,9 +29,9 @@ export async function scheduleDailyReminder(hour = 12, minute = 0) {
       sound: true,
     },
     trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour,
       minute,
+      repeats: true,
     },
   });
 }
@@ -53,7 +51,7 @@ export async function scheduleGachaExpiry(id: string, expiresAt: number, app: st
       body: `${app} の解放時間が終了しました`,
       sound: true,
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: trigger },
+    trigger: { date: trigger },
   });
 }
 
