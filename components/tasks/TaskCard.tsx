@@ -52,7 +52,7 @@ export function TaskCard({ task, subject, onPress, onComplete }: Props) {
             </Text>
           </View>
           {dueStr && (
-            <Text variant="labelSmall" style={[styles.due, isOverdue && styles.overdue]}>
+            <Text variant="labelSmall" style={[styles.due, isOverdue ? styles.overdue : null]}>
               {dueStr}
             </Text>
           )}
