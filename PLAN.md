@@ -314,7 +314,7 @@ GET              /api/shop/purchases
 
 ### Phase 0: 環境セットアップ ← 次にやること
 1. Firebase プロジェクト作成（Firestore + Auth 有効化）
-2. `gamingtask-server` GitHub リポジトリ作成
+2. モノレポ構成（フロント + `server/` フォルダ）に変更済み
 3. Expo アプリ scaffold: `npx create-expo-app@latest . --template blank-typescript`
 4. サーバー scaffold: `npm init` + 必要パッケージインストール
 5. `.env.development` 用意 / `.gitignore` に `.env` 追加（最重要）
