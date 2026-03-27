@@ -1,11 +1,11 @@
 # 勉強タスク管理アプリ 実装計画
 
+最終更新: 2026-03-27
+
 ## Context
 
-勉強タスクの作成・管理・進捗追跡・カレンダー表示ができるネイティブアプリを作成する。
-React Native + Expo（iOS/Android 対応）+ Node.js/Hono バックエンド + Firebase 構成。
-**今回はローカルサーバーで開発し、将来的に ConoHa VPS へそのままデプロイできる構成にする。**
-環境変数（`.env`）で接続先を切り替えるだけで本番移行できるようにする。
+勉強タスクの作成・管理・進捗追跡・カレンダー表示 + ゲーミフィケーション（XP・レベル・バッジ・ガチャ・RPGボス戦・マネー＆ショップ）を持つネイティブアプリを作成する。
+**現在はローカルサーバーで開発し、将来的に ConoHa VPS へそのままデプロイできる構成にする。**
 
 ---
 
@@ -40,7 +40,7 @@ React Native + Expo（iOS/Android 対応）+ Node.js/Hono バックエンド + F
 
 ## Tech Stack
 
-### フロントエンド（モバイルアプリ）
+### フロントエンド
 
 | 目的 | ライブラリ |
 |---|---|
@@ -48,12 +48,14 @@ React Native + Expo（iOS/Android 対応）+ Node.js/Hono バックエンド + F
 | 言語 | TypeScript |
 | ルーティング | expo-router v4（ファイルベース） |
 | 状態管理 | Zustand v5 |
-| HTTP クライアント | axios または fetch |
+| HTTP クライアント | axios（IDトークン自動リフレッシュ付き） |
 | UI | react-native-paper（Material Design 3） |
 | チャート | victory-native v41（Skia ベース） |
 | カレンダー | react-native-calendars |
 | アニメーション | react-native-reanimated v3 |
 | 日付計算 | date-fns v3 |
+| セキュアストレージ | expo-secure-store |
+| 通知 | expo-notifications |
 
 ### バックエンド
 
@@ -64,10 +66,8 @@ React Native + Expo（iOS/Android 対応）+ Node.js/Hono バックエンド + F
 | Firebase 連携 | firebase-admin SDK |
 | 言語 | TypeScript |
 | コンテナ管理 | Docker + Docker Compose |
-| 開発時 | `docker compose up`（tsx --watch でホットリロード） |
-| 本番時 | 同じ compose ファイル + nginx コンテナ追加（ConoHa VPS 移行後） |
 
-### バックエンド（クラウドサービス）
+### クラウドサービス
 
 | 目的 | サービス |
 |---|---|
@@ -78,48 +78,83 @@ React Native + Expo（iOS/Android 対応）+ Node.js/Hono バックエンド + F
 
 ## データモデル
 
-### Task
 ```typescript
 interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  subjectId: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'skipped';
+  id: string; title: string; description?: string;
+  subjectId: string; status: 'pending' | 'in_progress' | 'completed' | 'skipped';
   priority: 'low' | 'medium' | 'high';
-  dueDate: number | null;        // Unix ms
-  estimatedMinutes: number;
-  actualMinutes: number;
-  completedAt: number | null;
-  createdAt: number;
-  updatedAt: number;
-  userId: string;                // Firebase Auth UID
+  dueDate: number | null; estimatedMinutes: number; actualMinutes: number;
+  completedAt: number | null; createdAt: number; updatedAt: number; userId: string;
 }
-```
 
-### Subject（科目）
-```typescript
 interface Subject {
-  id: string;
-  name: string;
-  color: string;  // hex
-  icon: string;   // MaterialCommunityIcons name
-  createdAt: number;
-  userId: string;
+  id: string; name: string; color: string; icon: string;
+  createdAt: number; userId: string;
 }
-```
 
-### StudySession（学習記録）
-```typescript
 interface StudySession {
+  id: string; taskId: string; subjectId: string;
+  durationMinutes: number; date: string;
+  startedAt: number; endedAt: number; userId: string;
+}
+
+interface UserProfile {
+  id: string; displayName: string;
+  level: number; xp: number; totalXp: number;
+  weeklyPoints: number; streak: number; longestStreak: number;
+  avatarId: string; unlockedAvatars: string[];
+  gachaTickets: number;
+  money: number;
+  totalMoneyEarned: number;
+  xpBoostExpiresAt: number | null;
+  partyId: string | null;
+  createdAt: number; userId: string;
+}
+
+interface Badge {
+  id: string; name: string; description: string;
+  icon: string; unlockedAt: number; userId: string;
+}
+
+interface GachaResult {
+  id: string; userId: string;
+  rewardMinutes: number; rarity: 'normal' | 'rare' | 'sr';
+  used: boolean; usedAt: number | null;
+  targetApp: string | null; expiresAt: number | null;
+  createdAt: number;
+}
+
+interface ShopItem {
   id: string;
-  taskId: string;
-  subjectId: string;
-  durationMinutes: number;
-  date: string;           // "2026-03-26"
-  startedAt: number;
-  endedAt: number;
-  userId: string;
+  type: 'avatar' | 'costume' | 'accessory' | 'gacha_ticket' | 'time_extension' | 'xp_boost';
+  name: string; description: string; imageUrl?: string;
+  price: number; value?: number; isLimited: boolean;
+}
+
+interface PurchaseLog {
+  id: string; userId: string; shopItemId: string;
+  price: number; createdAt: number;
+}
+
+interface Boss {
+  id: string; name: string; imageUrl: string;
+  level: number; hp: number; maxHp: number;
+  type: 'global' | 'party'; partyId?: string;
+  startsAt: number; endsAt: number;
+  isDefeated: boolean; defeatedAt: number | null;
+  moneyReward: number;
+}
+
+interface BossDamageLog {
+  id: string; bossId: string; userId: string;
+  damage: number; taskId: string; createdAt: number;
+}
+
+interface Party {
+  id: string; name: string;
+  leaderId: string; memberIds: string[];
+  inviteCode: string; currentBossId: string | null;
+  createdAt: number;
 }
 ```
 
@@ -127,74 +162,109 @@ interface StudySession {
 
 ## ディレクトリ構成
 
-### フロントエンド
+### フロントエンド（gamingtask/）
 
 ```
-studytask/
-├── app/
-│   ├── (tabs)/
-│   │   ├── _layout.tsx       # タブバー設定
-│   │   ├── index.tsx         # タスク一覧
-│   │   ├── calendar.tsx      # カレンダー
-│   │   └── stats.tsx         # 統計
-│   ├── task/
-│   │   ├── new.tsx           # タスク作成（モーダル）
-│   │   └── [id].tsx          # タスク編集（モーダル）
-│   ├── subject/
-│   │   └── manage.tsx        # 科目管理
-│   ├── auth/
-│   │   ├── login.tsx         # ログイン画面
-│   │   └── register.tsx      # 新規登録画面
-│   ├── lock.tsx              # アプリロック画面
-│   ├── settings.tsx          # 設定画面
-│   └── _layout.tsx           # ルートレイアウト（認証チェック）
-├── components/
-│   ├── tasks/                # TaskCard, TaskList, TaskForm, TaskFilterBar
-│   ├── calendar/             # CalendarView, DayTaskList
-│   ├── stats/                # StudyTimeChart, CompletionRing, StreakDisplay
-│   ├── subjects/             # SubjectBadge, SubjectPicker
-│   └── ui/                   # Button, Card, EmptyState, ProgressBar, SwipeableRow
-├── store/
-│   ├── taskStore.ts
-│   ├── subjectStore.ts
-│   ├── statsStore.ts
-│   └── authStore.ts          # 認証状態管理
-├── api/
-│   ├── client.ts             # axios インスタンス（ベースURL + 認証ヘッダー）
-│   ├── taskApi.ts            # タスク API 呼び出し
-│   ├── subjectApi.ts
-│   └── statsApi.ts
-├── hooks/                    # useTasks, useSubjects, useStats, useCalendarData, useAuth
-├── types/index.ts
-└── utils/                    # dateUtils, timeUtils, colorUtils, constants
+app/
+├── (tabs)/
+│   ├── _layout.tsx       # タブバー設定（5タブ）
+│   ├── index.tsx         # タスク一覧
+│   ├── boss.tsx          # ボス戦（グローバル/パーティ）
+│   ├── calendar.tsx      # カレンダー
+│   ├── stats.tsx         # 統計
+│   └── profile.tsx       # プロフィール
+├── task/
+│   ├── new.tsx           # タスク作成（モーダル）
+│   └── [id].tsx          # タスク編集（モーダル）
+├── boss/
+│   └── victory.tsx       # 討伐成功演出
+├── party/
+│   └── manage.tsx        # パーティ管理
+├── gacha.tsx             # ガチャ
+├── gacha/use.tsx         # ガチャ報酬使用
+├── shop.tsx              # ショップ
+├── subject/manage.tsx    # 科目管理
+├── avatar.tsx            # アバター選択
+├── auth/
+│   ├── login.tsx
+│   └── register.tsx
+├── lock.tsx              # アプリロック画面
+├── settings.tsx          # 設定画面
+└── _layout.tsx           # ルートレイアウト（認証チェック）
+
+components/
+├── tasks/
+├── calendar/
+├── stats/
+├── subjects/
+├── gamification/         # XPBar, LevelUpModal, BadgeCard, XPPopup, AvatarDisplay, CoinDisplay
+├── gacha/                # GachaCard, GachaResultModal, GachaTimerBadge, TicketCounter
+├── boss/                 # BossCard, BossHPBar, DamagePopup, DamageLog, VictoryModal, PartyCard
+├── shop/                 # ShopItemCard, PurchaseConfirmModal, CoinBalance
+└── ui/
+
+store/
+├── authStore.ts
+├── taskStore.ts
+├── subjectStore.ts
+├── statsStore.ts
+├── profileStore.ts       # XP・レベル・バッジ・チケット・コイン・XPブースト
+├── gachaStore.ts
+├── bossStore.ts
+└── shopStore.ts
+
+api/
+├── client.ts             # axios（IDトークン自動リフレッシュ）
+├── taskApi.ts
+├── subjectApi.ts
+├── statsApi.ts
+├── profileApi.ts
+├── gachaApi.ts
+├── bossApi.ts
+├── partyApi.ts
+└── shopApi.ts
+
+hooks/
+├── useAuth.ts
+├── useTasks.ts
+├── useStats.ts
+├── useCalendarData.ts
+├── useProfile.ts
+├── useGacha.ts
+├── useBoss.ts
+├── useParty.ts
+└── useShop.ts
+
+types/index.ts
+utils/
 ```
 
-### バックエンド
+### バックエンド（gamingtask-server/）
 
 ```
-server/
-├── src/
-│   ├── index.ts              # Hono アプリ起動・ミドルウェア設定
-│   ├── routes/
-│   │   ├── tasks.ts          # GET/POST/PUT/DELETE /tasks
-│   │   ├── subjects.ts       # GET/POST/PUT/DELETE /subjects
-│   │   ├── sessions.ts       # POST /sessions, GET /stats
-│   │   └── auth.ts           # POST /auth/verify
-│   ├── middleware/
-│   │   └── authMiddleware.ts # Firebase ID トークン検証
-│   ├── firebase/
-│   │   └── admin.ts          # Firebase Admin SDK 初期化
-│   └── types/
-│       └── index.ts
-├── Dockerfile                # Node.js イメージ定義
-├── docker-compose.yml        # 開発用（ホットリロード + ボリュームマウント）
-├── docker-compose.prod.yml   # 本番用（nginx コンテナ追加）← ConoHa 移行時
-├── nginx/
-│   └── default.conf          # Nginx リバースプロキシ設定 ← ConoHa 移行時
-├── package.json
-├── tsconfig.json
-├── .env.development          # ローカル用環境変数
-└── .env.production           # 本番用環境変数 ← ConoHa 移行時
+src/
+├── index.ts
+├── routes/
+│   ├── tasks.ts
+│   ├── subjects.ts
+│   ├── sessions.ts
+│   ├── profile.ts        # XP・コイン・チケット付与
+│   ├── gacha.ts          # サーバー側抽選
+│   ├── boss.ts           # ダメージ処理・討伐判定・報酬付与
+│   ├── party.ts          # パーティ管理
+│   └── shop.ts           # 購入処理
+├── middleware/
+│   └── authMiddleware.ts
+└── firebase/
+    └── admin.ts
+
+Dockerfile
+docker-compose.yml
+docker-compose.prod.yml   # ConoHa VPS 移行時
+nginx/default.conf        # ConoHa VPS 移行時
+.env.development
+.env.production           # ConoHa VPS 移行時
+.gitignore                # .env を必ず含める
 ```
 
 ---
@@ -202,204 +272,123 @@ server/
 ## API エンドポイント設計
 
 ```
-POST   /api/tasks           タスク作成
-GET    /api/tasks           タスク一覧（クエリ: status, subjectId, date）
-PUT    /api/tasks/:id       タスク更新
-DELETE /api/tasks/:id       タスク削除
+POST/GET         /api/tasks
+PUT/DELETE       /api/tasks/:id
 
-POST   /api/subjects        科目作成
-GET    /api/subjects        科目一覧
-PUT    /api/subjects/:id    科目更新
-DELETE /api/subjects/:id    科目削除
+POST/GET         /api/subjects
+PUT/DELETE       /api/subjects/:id
 
-POST   /api/sessions        学習記録追加
-GET    /api/stats/weekly    週次統計
-GET    /api/stats/streak    ストリーク情報
+POST             /api/sessions
+GET              /api/stats/weekly
+GET              /api/stats/streak
+
+GET/PUT          /api/profile
+GET              /api/profile/badges
+POST             /api/profile/xp        # XP・コイン・チケット付与（サーバー側のみ）
+
+POST             /api/gacha/spin        # サーバー側抽選
+GET              /api/gacha/results
+POST             /api/gacha/use/:id
+
+GET              /api/boss/global
+GET              /api/boss/global/logs
+POST             /api/boss/global/damage
+
+GET              /api/party
+POST             /api/party
+POST             /api/party/join
+DELETE           /api/party/leave
+GET              /api/party/boss
+POST             /api/party/boss/damage
+
+GET              /api/shop
+POST             /api/shop/purchase/:id
+GET              /api/shop/purchases
 ```
 
 すべてのリクエストに `Authorization: Bearer <FirebaseIDToken>` ヘッダーが必要。
-Hono の authMiddleware がトークンを検証し `userId` を取得する。
-
----
-
-## 画面構成
-
-### 認証フロー
-- 未ログイン → `auth/login.tsx`（ログイン / 新規登録へ）
-- ログイン済み → `(tabs)` タブ画面へ
-
-### Tab 1 - タスク一覧（`app/(tabs)/index.tsx`）
-- 科目フィルターチップ（横スクロール）
-- セクション別リスト：期限切れ / 今日 / 今後 / 完了済み
-- 左スワイプ → 削除、右スワイプ → 完了
-- FAB（＋） → タスク作成モーダル
-
-### Tab 2 - カレンダー（`app/(tabs)/calendar.tsx`）
-- 月カレンダー（タスクのある日にカラードット）
-- 選択日のタスクリスト表示（下半分）
-
-### Tab 3 - 統計（`app/(tabs)/stats.tsx`）
-- ストリーク（連続日数）カード
-- 今週の学習時間棒グラフ（7日分）
-- 科目別完了率
-- 科目別学習時間ドーナツチャート
-- 期間切り替え：週 / 月 / 全期間
-
-### タスク作成/編集（モーダル）
-- フィールド：タイトル、科目、優先度、期限日、予定時間、メモ
-- 編集時のみ：学習時間記録、ステータス切り替え
-
-### アプリロック画面（`app/lock.tsx`）
-- 対象アプリ起動時にフルスクリーンで表示
-- 未完了タスク件数と科目一覧を表示（「あと X 件」）
-- 「タスクを確認する」ボタン → アプリのタスク一覧へ遷移
-- 「緊急解除」ボタン → PIN 入力ダイアログ（4桁）
-- PIN 正解 → 当日中ロック解除、履歴に記録
-- PIN 不正解 → エラー表示（連続失敗でクールダウン）
-
-### 設定画面（`app/settings.tsx`）
-- ロック機能のオン/オフ切り替え
-- ブロック対象アプリ選択（Android: アプリ一覧 / iOS: FamilyActivityPicker）
-- 選択済みアプリ一覧（削除可能）
-- PIN 変更（現在の PIN → 新しい PIN）
-- 通知時刻の設定（デフォルト 12:00）
 
 ---
 
 ## 実装ステップ
 
-### Phase 0: 環境セットアップ
+### Phase 0: 環境セットアップ ← 次にやること
 1. Firebase プロジェクト作成（Firestore + Auth 有効化）
-2. Expo アプリ scaffold: `npx create-expo-app@latest studytask --template blank-typescript`
-3. サーバープロジェクト scaffold: `mkdir server && npm init`
-4. 環境変数ファイルを用意（開発・本番で切り替え可能な構成）
-
-```
-server/
-├── .env.development   # API_BASE_URL=http://192.168.x.x:3000
-└── .env.production    # API_BASE_URL=https://your-domain.com  ← ConoHa 移行時
-
-studytask/
-├── .env.development   # EXPO_PUBLIC_API_URL=http://192.168.x.x:3000
-└── .env.production    # EXPO_PUBLIC_API_URL=https://your-domain.com
-```
+2. `gamingtask-server` GitHub リポジトリ作成
+3. Expo アプリ scaffold: `npx create-expo-app@latest . --template blank-typescript`
+4. サーバー scaffold: `npm init` + 必要パッケージインストール
+5. `.env.development` 用意 / `.gitignore` に `.env` 追加（最重要）
 
 ### Phase 1: バックエンド（Hono API サーバー）
-1. Hono セットアップ + TypeScript 設定
-2. `Dockerfile` 作成（Node.js LTS イメージ）
-3. `docker-compose.yml` 作成（ボリュームマウントでホットリロード）
-4. Firebase Admin SDK 初期化（`/src/firebase/admin.ts`）
-5. 認証ミドルウェア（ID トークン検証）
-6. タスク CRUD ルート（Firestore 読み書き）
-7. 科目 CRUD ルート
-8. 学習記録・統計ルート
-9. `docker compose up` でローカル起動確認
+1. Hono + TypeScript セットアップ
+2. `Dockerfile` + `docker-compose.yml`（ホットリロード付き）
+3. Firebase Admin SDK 初期化 + Firestore セキュリティルール設定
+4. 認証ミドルウェア（IDトークン検証）
+5. タスク / 科目 / 学習記録 CRUD ルート
+6. ゲーミフィケーション API（XP・マネー・チケット付与・バッジ判定）
+7. ガチャ API（サーバー側抽選・タイマー管理）
+8. ボス戦 API（ダメージ処理・HP管理・討伐判定・報酬付与）
+9. パーティ API（作成・参加・招待コード）
+10. ショップ API（商品一覧・購入処理・残高チェック・二重購入防止）
 
 ### Phase 2: フロントエンド データ層
-1. `/types/index.ts` 全インターフェース定義
-2. `/api/client.ts` — axios インスタンス（Firebase ID トークンを自動付与）
-3. 各 API モジュール（taskApi, subjectApi, statsApi）
-4. 認証ストア（Firebase Auth SDK でログイン/ログアウト管理）
+1. `types/index.ts` 全インターフェース定義
+2. `api/client.ts` — axios（IDトークン自動リフレッシュ付き）
+3. 各 API モジュール
 
-### Phase 3: フロントエンド 状態管理
-1. `authStore.ts` — ユーザー状態 + ID トークン管理
-2. `taskStore.ts` — API 呼び出し + ローカルキャッシュ
-3. `subjectStore.ts`
-4. `statsStore.ts`
+### Phase 3: 状態管理（Zustand v5）
+1. authStore / taskStore / subjectStore / statsStore
+2. profileStore（XP・レベル・バッジ・チケット・コイン・XPブースト）
+3. gachaStore / bossStore / shopStore
 
 ### Phase 4: カスタムフック
-1. `useAuth.ts` — 認証状態・ログイン/ログアウト
-2. `useTasks.ts` — グループ化タスク（overdue/today/upcoming/completed）
-3. `useStats.ts` — 統計データ（期間別）
-4. `useCalendarData.ts` — カレンダー用マーク済み日付
+useAuth / useTasks / useStats / useCalendarData / useProfile / useGacha / useBoss / useParty / useShop
 
 ### Phase 5: UI コンポーネント
-1. 基本 UI（Button, Card, EmptyState, SwipeableRow）
-2. 科目コンポーネント（SubjectBadge, SubjectPicker）
-3. タスクコンポーネント（TaskCard, TaskList, TaskForm, TaskFilterBar）
-4. カレンダーコンポーネント（CalendarView, DayTaskList）
-5. 統計コンポーネント（StudyTimeChart, CompletionRing, StreakDisplay）
+1. 基本 UI
+2. 科目・タスク・カレンダー・統計コンポーネント
+3. ゲーミフィケーションコンポーネント（XPBar / LevelUpModal / BadgeCard / XPPopup / AvatarDisplay / CoinDisplay）
+4. ガチャコンポーネント（GachaCard / GachaResultModal / GachaTimerBadge / TicketCounter）
+5. ボス戦コンポーネント（BossCard / BossHPBar / DamagePopup / DamageLog / VictoryModal / PartyCard）
+6. ショップコンポーネント（ShopItemCard / PurchaseConfirmModal / CoinBalance）
 
 ### Phase 6: 画面実装
-1. `_layout.tsx` — 認証チェック（未ログインなら auth/login へリダイレクト）
-2. ログイン / 新規登録画面
-3. タブレイアウト + タスク一覧 → カレンダー → 統計
-4. タスク作成・編集モーダル
-5. 科目管理画面
-6. 設定画面
+1. 認証チェック・ログイン・新規登録
+2. タブレイアウト（タスク / ボス戦 / カレンダー / 統計 / プロフィール）
+3. タスク作成・編集モーダル
+4. ボス戦・パーティ管理・討伐成功演出画面
+5. ショップ・ガチャ・報酬使用画面
+6. プロフィール・アバター選択・科目管理・設定画面
 
 ### Phase 7: アプリロック機能
-
-#### Android（Accessibility Service）
-1. `android/` にカスタムネイティブモジュール作成（Expo Dev Build 必須）
-2. `AccessibilityService` を実装 — フォアグラウンドアプリのパッケージ名を検知
-3. **ユーザーが設定したアプリのみ**を対象に判定（ブロック対象リストと照合）
-4. 対象アプリ起動 + 未完了タスクあり → ロック画面を前面表示
-5. 対象外アプリは通常通り使用可能
-6. タスク完了時にロック解除
-
-#### iOS（Screen Time API）
-1. Apple Developer アカウントで `Family Controls` 権限を申請
-2. Expo Dev Build に `com.apple.developer.family-controls` entitlement を追加
-3. `FamilyControls` + `ManagedSettings` + `DeviceActivity` フレームワークを Swift で実装
-4. `FamilyActivityPicker` UI でユーザーがブロック対象アプリを選択・保存
-5. **選択したアプリのみ** `ManagedSettings` でブロック（未完了タスクがある間）
-6. タスク完了でブロック解除
-
-#### 共通 UI
-- **ブロック対象アプリ選択画面**（設定画面に追加）
-  - Android: インストール済みアプリ一覧から選択
-  - iOS: `FamilyActivityPicker`（システム標準の選択 UI）を使用
-- **ロック画面**
-  - 「タスクを完了してください」メッセージ + 未完了タスク件数
-  - タスク一覧へのリンク
-  - 「緊急解除」ボタン → PIN 入力ダイアログ表示
-- **緊急解除（PIN）**
-  - 4桁 PIN を入力すると一時的にロック解除（当日中のみ有効）
-  - PIN は `expo-secure-store` に暗号化して保存
-  - 初期 PIN はアプリ初回起動時に設定（デフォルト値あり）
-  - 設定画面から PIN 変更可能
-- ロックのオン/オフ切り替えスイッチ
-- 選択したアプリのアイコン・名前を一覧表示（確認・削除できる）
-
-> **前提**: Expo Dev Build（Expo Go 不可）、iOS は Apple Developer アカウント + Family Controls 権限申請が必要
+- **Android**: Accessibility Service（先に実装）
+- **iOS**: Apple Developer アカウント取得後に追加
+- ガチャ報酬タイマーと連携（解放中は一時的にロック解除）
+- 緊急解除: 4桁 PIN（初回起動時に強制設定）
 
 ### Phase 8: 通知機能
-
-1. `expo-notifications` を導入
-2. アプリ起動時に通知権限をリクエスト
-3. 毎日 12:00 に「本日のタスク」リマインダーをスケジュール
-   - 未完了タスクがある場合のみ通知
-   - 通知内容：「今日のタスクが X 件あります」
-   - タップ → アプリのタスク一覧画面を開く
-4. タスク完了・追加時に翌日分のスケジュールを再設定
-
-> **実装メモ**: `expo-notifications` の `scheduleNotificationAsync` で毎日12:00のトリガーを設定
+- 毎日 12:00 リマインド
+- ガチャタイマー終了通知
+- ボス討伐成功通知（全参加者）
+- ボス週次リセット前日通知
 
 ### Phase 9: 仕上げ
-1. ライト/ダークテーマ対応
-2. Reanimated アニメーション
-3. エラーハンドリング（API エラー → Snackbar 表示）
-4. ローディング状態（スケルトン）
-5. オフライン時のフォールバック表示
+- ライト/ダークテーマ
+- Reanimated アニメーション（ダメージ・レベルアップ・討伐・コイン獲得）
+- エラーハンドリング（Snackbar）
+- ローディング（スケルトン）
+- オフライン時フォールバック
+- i18n 準備（将来の多言語対応）
 
 ---
 
-## 重要ファイル
-
-**フロントエンド**
-- `/types/index.ts` — 全型定義の基盤
-- `/api/client.ts` — 認証ヘッダー付き HTTP クライアント
-- `/store/authStore.ts` — 認証状態の中心
-- `/store/taskStore.ts` — タスク状態の中心
-- `/app/_layout.tsx` — 認証ルーティングの起点
-- `/app/lock.tsx` — アプリロック画面
-- `/app/settings.tsx` — 設定画面
-
-**バックエンド**
-- `server/src/index.ts` — Hono エントリーポイント
-- `server/src/middleware/authMiddleware.ts` — 全 API の認証ガード
-- `server/src/firebase/admin.ts` — Firestore 接続
+## セキュリティ対応（実装時に必ず入れる）
+1. `.gitignore` に `.env` を追加（最重要）
+2. Firestore セキュリティルールで `userId == request.auth.uid` を必須に
+3. 初回起動時にPIN強制設定（デフォルトPINをコードに残さない）
+4. XP・コイン・チケット・ダメージ付与はサーバー側のみで処理
+5. 購入処理はサーバー側で残高チェック・二重購入防止
+6. axios インターセプターで IDトークン自動リフレッシュ
 
 ---
 
@@ -407,20 +396,18 @@ studytask/
 
 ```bash
 # バックエンド起動（Docker）
-cd server && docker compose up
+cd gamingtask-server && docker compose up
 
 # フロントエンド起動
-cd studytask && npx expo start
+cd gamingtask && npx expo start
 ```
 
-- ローカル IP（例: `192.168.1.10:3000`）を `.env.development` に設定し、スマホ実機 / シミュレーターから接続
-- 新規登録 → ログイン → タスク作成 → 一覧表示 → カレンダードット確認 → 完了 → 統計反映
-- iOS Simulator + Android Emulator の両方で動作確認
+ローカル IP（例: `192.168.1.10:3000`）を `.env.development` に設定し、スマホ実機 / シミュレーターから接続
 
 ## ConoHa VPS 移行手順（将来）
 
 1. ConoHa VPS に Docker / Docker Compose をインストール
-2. `server/` を VPS にデプロイ（git clone）
+2. `gamingtask-server/` を VPS にデプロイ（git clone）
 3. `docker-compose.prod.yml` で nginx コンテナ + Let's Encrypt を追加
 4. `.env.production` のドメインを更新
 5. `docker compose -f docker-compose.prod.yml up -d` で起動
