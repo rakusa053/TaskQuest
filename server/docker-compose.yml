@@ -1,0 +1,11 @@
+services:
+  hono-api:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+    env_file:
+      - .env.development
+    restart: unless-stopped
