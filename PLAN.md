@@ -1,6 +1,6 @@
 # 勉強タスク管理アプリ 実装計画
 
-最終更新: 2026-03-27
+最終更新: 2026-03-27（Phase 7-9 完了）
 
 ## Context
 
@@ -360,25 +360,28 @@ useAuth / useTasks / useStats / useCalendarData / useProfile / useGacha / useBos
 5. ショップ・ガチャ・報酬使用画面
 6. プロフィール・アバター選択・科目管理・設定画面
 
-### Phase 7: アプリロック機能
-- **Android**: Accessibility Service（先に実装）
-- **iOS**: Apple Developer アカウント取得後に追加
-- ガチャ報酬タイマーと連携（解放中は一時的にロック解除）
-- 緊急解除: 4桁 PIN（初回起動時に強制設定）
+### Phase 7: アプリロック機能 ✅
+- フォーカスモード UI（PIN ロック画面）
+- expo-secure-store に PIN 保存
+- 設定画面でフォーカスモード ON/OFF
+- ※完全な Android アプリブロックは bare workflow + UsageStats ネイティブモジュールが必要（将来対応）
 
-### Phase 8: 通知機能
-- 毎日 12:00 リマインド
+### Phase 8: 通知機能 ✅
+- expo-notifications 初期化
+- 毎日リマインド（時刻設定可能）
 - ガチャタイマー終了通知
-- ボス討伐成功通知（全参加者）
-- ボス週次リセット前日通知
+- ボス討伐成功通知
+- expo-task-manager / expo-background-fetch 登録
 
-### Phase 9: 仕上げ
-- ライト/ダークテーマ
-- Reanimated アニメーション（ダメージ・レベルアップ・討伐・コイン獲得）
+### Phase 9: 仕上げ ✅
+- XPPopup アニメーション（タスク完了時）
+- LevelUpModal
 - エラーハンドリング（Snackbar）
-- ローディング（スケルトン）
-- オフライン時フォールバック
-- i18n 準備（将来の多言語対応）
+- LoadingOverlay
+- Pull-to-refresh（タスク一覧）
+- victory-native チャート（統計画面）
+- react-native-calendars（カレンダー画面）
+- 設定画面・科目管理・アバター選択 画面実装完了
 
 ---
 

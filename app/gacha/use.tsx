@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useGacha } from '../../hooks/useGacha';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { scheduleGachaExpiry } from '../../lib/notifications';
 import type { GachaResult } from '../../types';
 
 const RARITY_COLOR = { normal: '#6b7280', rare: '#6366f1', sr: '#f59e0b' };
@@ -25,8 +26,9 @@ export default function UseGachaScreen() {
         {
           text: '使う', onPress: async () => {
             try {
-              await useResult(result.id, 'default');
-              Alert.alert('解放開始！', `${result.rewardMinutes}分間アプリが解放されました`);
+              const data = await useResult(result.id, 'default');
+              await scheduleGachaExpiry(result.id, data.expiresAt, '解放アプリ');
+              Alert.alert('解放開始！', `${result.rewardMinutes}分間アプリが解放されました\nタイマー終了時に通知します`);
             } catch {
               Alert.alert('エラー', '使用に失敗しました');
             }

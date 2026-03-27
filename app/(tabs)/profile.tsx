@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Surface, Avatar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -23,7 +23,9 @@ export default function ProfileScreen() {
         {/* アバター & 基本情報 */}
         <Surface style={styles.card}>
           <View style={styles.avatarRow}>
-            <Avatar.Text size={72} label={profile.displayName.charAt(0).toUpperCase()} style={styles.avatar} />
+            <TouchableOpacity onPress={() => router.push('/avatar')}>
+              <Avatar.Text size={72} label={profile.displayName.charAt(0).toUpperCase()} style={styles.avatar} />
+            </TouchableOpacity>
             <View style={styles.info}>
               <Text variant="titleLarge" style={styles.name}>{profile.displayName}</Text>
               <XPBar level={profile.level} xp={profile.xp} />
@@ -81,6 +83,7 @@ export default function ProfileScreen() {
           </View>
         </Surface>
 
+        <Button label="設定" onPress={() => router.push('/settings')} mode="outlined" />
         <Button label="ログアウト" onPress={logout} mode="outlined" />
       </ScrollView>
     </SafeAreaView>

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { bossApi } from '../api/bossApi';
+import { sendBossDefeatedNotification } from '../lib/notifications';
 import type { Boss, BossDamageLog } from '../types';
 
 interface BossState {
@@ -45,7 +46,10 @@ export const useBossStore = create<BossState>((set, get) => ({
     if (boss) {
       const updated = { ...boss, hp: result.newHp };
       set({ globalBoss: updated });
-      if (result.isDefeated) set({ lastDefeat: updated });
+      if (result.isDefeated) {
+        set({ lastDefeat: updated });
+        await sendBossDefeatedNotification(boss.name);
+      }
     }
     return result;
   },

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, FAB } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,8 @@ import { useProfileStore } from '../../store/profileStore';
 import { TaskCard } from '../../components/tasks/TaskCard';
 import { TaskFilterBar } from '../../components/tasks/TaskFilterBar';
 import { LevelUpModal } from '../../components/gamification/LevelUpModal';
+import { XPPopup } from '../../components/gamification/XPPopup';
+import { Snackbar } from '../../components/ui/Snackbar';
 import { EmptyState } from '../../components/ui/EmptyState';
 import type { Task } from '../../types';
 
@@ -16,8 +18,12 @@ export default function TasksScreen() {
   const router = useRouter();
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [popup, setPopup] = useState<{ xp: number; money: number; damage: number } | null>(null);
+  const [snackbar, setSnackbar] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
   const { subjects } = useSubjectStore();
-  const { tasks, loading, completeTask } = useTasks();
+  const { tasks, loading, completeTask, fetch } = useTasks();
   const { lastLevelUp, clearLevelUp } = useProfileStore();
 
   const filtered = tasks.filter((t) => {
@@ -28,24 +34,24 @@ export default function TasksScreen() {
 
   const getSubject = (subjectId: string) => subjects.find((s) => s.id === subjectId);
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetch();
+    setRefreshing(false);
+  };
+
   const handleComplete = async (task: Task) => {
-    Alert.alert('タスク完了', `「${task.title}」を完了しますか？`, [
-      { text: 'キャンセル', style: 'cancel' },
-      {
-        text: '完了', onPress: async () => {
-          try {
-            const result = await completeTask(task, task.estimatedMinutes);
-            Alert.alert(
-              'タスク完了！',
-              `+${result.xpResult.profile.xp - (result.xpResult.profile.xp)}XP\n` +
-              `ボスに${result.bossResult.damage}ダメージ！`
-            );
-          } catch {
-            Alert.alert('エラー', '完了処理に失敗しました');
-          }
-        }
-      },
-    ]);
+    try {
+      const result = await completeTask(task, task.estimatedMinutes);
+      setPopup({
+        xp: result.xpResult.xp,
+        money: result.xpResult.money,
+        damage: result.bossResult.damage,
+      });
+      setSnackbar({ msg: `タスク完了！${result.isOnTime ? ' 期限内ボーナス獲得！' : ''}`, type: 'success' });
+    } catch {
+      setSnackbar({ msg: '完了処理に失敗しました', type: 'error' });
+    }
   };
 
   return (
@@ -66,6 +72,7 @@ export default function TasksScreen() {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#6366f1" />}
         renderItem={({ item }) => (
           <TaskCard
             task={item}
@@ -75,11 +82,13 @@ export default function TasksScreen() {
           />
         )}
         ListEmptyComponent={
-          <EmptyState
-            icon="checkbox-marked-circle-outline"
-            title="タスクがありません"
-            description="右下の＋ボタンからタスクを追加しましょう"
-          />
+          !loading ? (
+            <EmptyState
+              icon="checkbox-marked-circle-outline"
+              title="タスクがありません"
+              description="右下の＋ボタンからタスクを追加しましょう"
+            />
+          ) : null
         }
       />
 
@@ -90,7 +99,18 @@ export default function TasksScreen() {
         color="#fff"
       />
 
+      {popup && (
+        <XPPopup
+          xp={popup.xp}
+          money={popup.money}
+          damage={popup.damage}
+          visible={!!popup}
+          onHide={() => setPopup(null)}
+        />
+      )}
+
       <LevelUpModal level={lastLevelUp} onClose={clearLevelUp} />
+      <Snackbar message={snackbar?.msg ?? null} type={snackbar?.type} onDismiss={() => setSnackbar(null)} />
     </SafeAreaView>
   );
 }

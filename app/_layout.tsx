@@ -3,11 +3,19 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { PaperProvider } from 'react-native-paper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAuth } from '../hooks/useAuth';
+import { useSettingsStore } from '../store/settingsStore';
+import { registerBackgroundFetch } from '../lib/notifications';
 
 export default function RootLayout() {
   const { user, initialized } = useAuth();
   const router = useRouter();
   const segments = useSegments();
+  const { load: loadSettings } = useSettingsStore();
+
+  useEffect(() => {
+    loadSettings();
+    registerBackgroundFetch();
+  }, []);
 
   useEffect(() => {
     if (!initialized) return;
@@ -35,6 +43,10 @@ export default function RootLayout() {
           <Stack.Screen name="shop/index" />
           <Stack.Screen name="boss/victory" options={{ presentation: 'modal' }} />
           <Stack.Screen name="lock" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen name="settings" />
+          <Stack.Screen name="subject/manage" />
+          <Stack.Screen name="party/manage" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="avatar" />
         </Stack>
       </PaperProvider>
     </GestureHandlerRootView>

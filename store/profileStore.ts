@@ -14,7 +14,7 @@ interface ProfileState {
     priority: 'low' | 'medium' | 'high';
     isOnTime: boolean;
     displayName?: string;
-  }) => Promise<{ newLevel?: number; newBadges?: Badge[] }>;
+  }) => Promise<{ xp: number; money: number; gachaTickets: number; newLevel?: number; newBadges?: Badge[] }>;
   update: (data: { displayName?: string; avatarId?: string }) => Promise<void>;
   clearLevelUp: () => void;
 }
@@ -47,7 +47,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     if (result.newBadges?.length) {
       set({ badges: [...get().badges, ...result.newBadges] });
     }
-    return { newLevel: result.newLevel, newBadges: result.newBadges };
+    return { xp: result.xp, money: result.money, gachaTickets: result.gachaTickets, newLevel: result.newLevel, newBadges: result.newBadges };
   },
 
   update: async (data) => {
