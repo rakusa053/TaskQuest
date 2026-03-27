@@ -2,17 +2,15 @@ import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { PaperProvider } from 'react-native-paper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
-// TODO: Firebase Auth 実装後に authStore から取得
-const useAuth = () => ({ user: null, isLoading: false });
+import { useAuth } from '../hooks/useAuth';
 
 export default function RootLayout() {
-  const { user, isLoading } = useAuth();
+  const { user, initialized } = useAuth();
   const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (!initialized) return;
 
     const inAuthGroup = segments[0] === 'auth';
 
@@ -21,7 +19,7 @@ export default function RootLayout() {
     } else if (user && inAuthGroup) {
       router.replace('/(tabs)');
     }
-  }, [user, isLoading, segments]);
+  }, [user, initialized, segments]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -32,8 +30,9 @@ export default function RootLayout() {
           <Stack.Screen name="auth/register" />
           <Stack.Screen name="task/new" options={{ presentation: 'modal' }} />
           <Stack.Screen name="task/[id]" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="gacha" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="shop" />
+          <Stack.Screen name="gacha/index" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="gacha/use" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="shop/index" />
           <Stack.Screen name="boss/victory" options={{ presentation: 'modal' }} />
           <Stack.Screen name="lock" options={{ presentation: 'fullScreenModal' }} />
         </Stack>

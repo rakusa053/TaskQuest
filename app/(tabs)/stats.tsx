@@ -1,20 +1,81 @@
-import { View, Text, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, Surface } from 'react-native-paper';
+import { useStats } from '../../hooks/useStats';
+import { useProfileStore } from '../../store/profileStore';
+import { StreakDisplay } from '../../components/stats/StreakDisplay';
+import { XPBar } from '../../components/gamification/XPBar';
+import { CoinDisplay } from '../../components/gamification/CoinDisplay';
 
 export default function StatsScreen() {
+  const { weekly, streak } = useStats();
+  const { profile } = useProfileStore();
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>統計</Text>
-        <Text style={styles.placeholder}>実装予定（Phase 6）</Text>
+      <View style={styles.header}>
+        <Text variant="headlineSmall" style={styles.title}>統計</Text>
       </View>
+      <ScrollView contentContainerStyle={styles.content}>
+        {profile && (
+          <Surface style={styles.card}>
+            <Text variant="titleSmall" style={styles.sectionTitle}>レベル・XP</Text>
+            <XPBar level={profile.level} xp={profile.xp} />
+            <View style={styles.row}>
+              <CoinDisplay amount={profile.money} />
+              <Text variant="labelSmall" style={styles.sub}>ガチャ x{profile.gachaTickets}</Text>
+            </View>
+          </Surface>
+        )}
+
+        {streak && (
+          <Surface style={styles.card}>
+            <Text variant="titleSmall" style={styles.sectionTitle}>ストリーク</Text>
+            <StreakDisplay streak={streak.current} longestStreak={streak.longest} />
+          </Surface>
+        )}
+
+        {weekly && (
+          <Surface style={styles.card}>
+            <Text variant="titleSmall" style={styles.sectionTitle}>今週の学習</Text>
+            <View style={styles.statRow}>
+              <View style={styles.statItem}>
+                <Text variant="headlineMedium" style={styles.statNum}>
+                  {Math.round(weekly.totalMinutes / 60 * 10) / 10}h
+                </Text>
+                <Text variant="labelSmall" style={styles.sub}>総学習時間</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text variant="headlineMedium" style={styles.statNum}>
+                  {weekly.completedTasks}
+                </Text>
+                <Text variant="labelSmall" style={styles.sub}>完了タスク</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text variant="headlineMedium" style={styles.statNum}>
+                  {profile?.totalXp ?? 0}
+                </Text>
+                <Text variant="labelSmall" style={styles.sub}>累計XP</Text>
+              </View>
+            </View>
+          </Surface>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  content: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#1f2937' },
-  placeholder: { fontSize: 14, color: '#9ca3af', marginTop: 8 },
+  container: { flex: 1, backgroundColor: '#f9fafb' },
+  header: { paddingHorizontal: 16, paddingTop: 8 },
+  title: { color: '#1f2937', fontWeight: '700' },
+  content: { padding: 16, gap: 12 },
+  card: { borderRadius: 16, padding: 16, backgroundColor: '#fff', gap: 12 },
+  sectionTitle: { color: '#374151', fontWeight: '700' },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 },
+  sub: { color: '#9ca3af' },
+  statRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  statItem: { alignItems: 'center', gap: 4 },
+  statNum: { color: '#6366f1', fontWeight: '700' },
 });

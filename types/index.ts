@@ -150,4 +150,7 @@ export interface StreakInfo {
   current: number;
   longest: number;
   lastStudyDate: string | null;
+  // aliases for compatibility
+  streak?: number;
+  longestStreak?: number;
 }
