@@ -22,6 +22,8 @@ export const useGachaStore = create<GachaState>((set, get) => ({
     try {
       const results = await gachaApi.results();
       set({ results });
+    } catch {
+      // サーバー未起動時はスキップ
     } finally {
       set({ loading: false });
     }

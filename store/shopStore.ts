@@ -27,14 +27,20 @@ export const useShopStore = create<ShopState>((set) => ({
     try {
       const items = await shopApi.items();
       set({ items });
+    } catch {
+      // サーバー未起動時はスキップ
     } finally {
       set({ loading: false });
     }
   },
 
   fetchPurchases: async () => {
-    const purchases = await shopApi.purchases();
-    set({ purchases });
+    try {
+      const purchases = await shopApi.purchases();
+      set({ purchases });
+    } catch {
+      // サーバー未起動時はスキップ
+    }
   },
 
   purchase: async (itemId) => {

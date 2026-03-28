@@ -30,28 +30,38 @@ export const useBossStore = create<BossState>((set, get) => ({
     try {
       const globalBoss = await bossApi.global();
       set({ globalBoss });
+    } catch {
+      // サーバー未起動時はスキップ
     } finally {
       set({ loading: false });
     }
   },
 
   fetchLogs: async () => {
-    const logs = await bossApi.globalLogs();
-    set({ logs });
+    try {
+      const logs = await bossApi.globalLogs();
+      set({ logs });
+    } catch {
+      // サーバー未起動時はスキップ
+    }
   },
 
   damage: async (data) => {
-    const result = await bossApi.damageGlobal(data);
-    const boss = get().globalBoss;
-    if (boss) {
-      const updated = { ...boss, hp: result.newHp };
-      set({ globalBoss: updated });
-      if (result.isDefeated) {
-        set({ lastDefeat: updated });
-        await sendBossDefeatedNotification(boss.name);
+    try {
+      const result = await bossApi.damageGlobal(data);
+      const boss = get().globalBoss;
+      if (boss) {
+        const updated = { ...boss, hp: result.newHp };
+        set({ globalBoss: updated });
+        if (result.isDefeated) {
+          set({ lastDefeat: updated });
+          await sendBossDefeatedNotification(boss.name);
+        }
       }
+      return result;
+    } catch {
+      return { damage: 0, newHp: get().globalBoss?.hp ?? 0, isDefeated: false };
     }
-    return result;
   },
 
   clearDefeat: () => set({ lastDefeat: null }),

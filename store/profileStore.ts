@@ -30,29 +30,43 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     try {
       const profile = await profileApi.get();
       set({ profile });
+    } catch {
+      // サーバー未起動時はスキップ
     } finally {
       set({ loading: false });
     }
   },
 
   fetchBadges: async () => {
-    const badges = await profileApi.badges();
-    set({ badges });
+    try {
+      const badges = await profileApi.badges();
+      set({ badges });
+    } catch {
+      // サーバー未起動時はスキップ
+    }
   },
 
   rewardXp: async (data) => {
-    const result = await profileApi.rewardXp(data);
-    set({ profile: result.profile });
-    if (result.newLevel) set({ lastLevelUp: result.newLevel });
-    if (result.newBadges?.length) {
-      set({ badges: [...get().badges, ...result.newBadges] });
+    try {
+      const result = await profileApi.rewardXp(data);
+      set({ profile: result.profile });
+      if (result.newLevel) set({ lastLevelUp: result.newLevel });
+      if (result.newBadges?.length) {
+        set({ badges: [...get().badges, ...result.newBadges] });
+      }
+      return { xp: result.xp, money: result.money, gachaTickets: result.gachaTickets, newLevel: result.newLevel, newBadges: result.newBadges };
+    } catch {
+      return { xp: 0, money: 0, gachaTickets: 0 };
     }
-    return { xp: result.xp, money: result.money, gachaTickets: result.gachaTickets, newLevel: result.newLevel, newBadges: result.newBadges };
   },
 
   update: async (data) => {
-    const profile = await profileApi.update(data);
-    set({ profile });
+    try {
+      const profile = await profileApi.update(data);
+      set({ profile });
+    } catch {
+      // サーバー未起動時はスキップ
+    }
   },
 
   clearLevelUp: () => set({ lastLevelUp: null }),

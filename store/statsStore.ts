@@ -20,13 +20,19 @@ export const useStatsStore = create<StatsState>((set) => ({
     try {
       const weekly = await statsApi.weekly();
       set({ weekly });
+    } catch {
+      // サーバー未起動時はスキップ
     } finally {
       set({ loading: false });
     }
   },
 
   fetchStreak: async () => {
-    const streak = await statsApi.streak();
-    set({ streak });
+    try {
+      const streak = await statsApi.streak();
+      set({ streak });
+    } catch {
+      // サーバー未起動時はスキップ
+    }
   },
 }));

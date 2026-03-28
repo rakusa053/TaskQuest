@@ -20,6 +20,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     try {
       const tasks = await taskApi.list(params);
       set({ tasks });
+    } catch {
+      // サーバー未起動時はスキップ
     } finally {
       set({ loading: false });
     }

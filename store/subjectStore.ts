@@ -20,6 +20,8 @@ export const useSubjectStore = create<SubjectState>((set, get) => ({
     try {
       const subjects = await subjectApi.list();
       set({ subjects });
+    } catch {
+      // サーバー未起動時はスキップ
     } finally {
       set({ loading: false });
     }
