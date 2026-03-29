@@ -24,7 +24,7 @@ export default function ProfileScreen() {
         <Surface style={styles.card}>
           <View style={styles.avatarRow}>
             <TouchableOpacity onPress={() => router.push('/avatar')}>
-              <Avatar.Text size={72} label={profile.displayName.charAt(0).toUpperCase()} style={styles.avatar} />
+              <Avatar.Text size={72} label={(profile.displayName ?? '?').charAt(0).toUpperCase()} style={styles.avatar} />
             </TouchableOpacity>
             <View style={styles.info}>
               <Text variant="titleLarge" style={styles.name}>{profile.displayName}</Text>
