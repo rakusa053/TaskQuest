@@ -1,0 +1,44 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    xmlns:tools="http://schemas.android.com/tools"
+4    package="expo.modules.appblocker" >
+5
+6    <uses-sdk android:minSdkVersion="23" />
+7
+8    <!-- UsageStats 権限（設定アプリで手動付与が必要） -->
+9    <uses-permission
+9-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:6:3-8:42
+10        android:name="android.permission.PACKAGE_USAGE_STATS"
+10-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:7:5-58
+11        tools:ignore="ProtectedPermissions" />
+11-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:8:5-40
+12
+13    <!-- フォアグラウンドサービス -->
+14    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+14-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:11:3-74
+14-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:11:20-72
+15    <!-- Android 14+ 用 specialUse タイプの許可 -->
+16    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+16-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:13:3-86
+16-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:13:20-84
+17
+18    <application>
+18-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:15:3-24:17
+19        <service
+19-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:16:5-23:15
+20            android:name="expo.modules.appblocker.AppBlockerService"
+20-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:17:7-63
+21            android:exported="false"
+21-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:19:7-31
+22            android:foregroundServiceType="specialUse" >
+22-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:18:7-49
+23            <property
+23-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:20:7-22:40
+24                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+24-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:21:9-68
+25                android:value="appMonitoring" />
+25-->/Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:22:9-38
+26        </service>
+27    </application>
+28
+29</manifest>

@@ -26,8 +26,11 @@
       "permissions": [
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
-        "USE_EXACT_ALARM"
-      ]
+        "USE_EXACT_ALARM",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.WAKE_LOCK"
+      ],
+      "package": "com.rakusa053.gamingtask"
     },
     "web": {
       "favicon": "./assets/favicon.png"

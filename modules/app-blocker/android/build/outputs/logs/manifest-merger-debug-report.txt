@@ -1,0 +1,48 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:2:1-26:12
+INJECTED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:2:1-26:12
+	package
+		INJECTED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:3:11-57
+	xmlns:android
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.PACKAGE_USAGE_STATS
+ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:6:3-8:42
+	tools:ignore
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:8:5-40
+	android:name
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:7:5-58
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:11:3-74
+	android:name
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:11:20-72
+uses-permission#android.permission.FOREGROUND_SERVICE_SPECIAL_USE
+ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:13:3-86
+	android:name
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:13:20-84
+application
+ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:15:3-24:17
+service#expo.modules.appblocker.AppBlockerService
+ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:16:5-23:15
+	android:exported
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:19:7-31
+	android:foregroundServiceType
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:18:7-49
+	android:name
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:17:7-63
+property
+ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:20:7-22:40
+	android:value
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:22:9-38
+	android:name
+		ADDED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml:21:9-68
+uses-sdk
+INJECTED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml
+INJECTED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/miyazaki/free/studytask/modules/app-blocker/android/src/main/AndroidManifest.xml
