@@ -1,0 +1,7 @@
+{
+  "name": "app-blocker",
+  "platforms": ["android"],
+  "android": {
+    "modules": ["expo.modules.appblocker.AppBlockerModule"]
+  }
+}

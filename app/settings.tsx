@@ -105,10 +105,10 @@ export default function SettingsScreen() {
             />
           )}
           <List.Item
-            title="Android アプリロック"
-            description="完全なアプリブロックには Android 版をご利用ください（使用状況へのアクセス許可が必要）"
-            titleStyle={{ color: '#9ca3af' }}
-            descriptionNumberOfLines={3}
+            title="ブロックするアプリを選択"
+            description="フォーカスモード中に開けなくするアプリを設定"
+            onPress={() => router.push('/blocked-apps')}
+            right={(props) => <List.Icon {...props} icon="chevron-right" />}
           />
         </List.Section>
 

@@ -5,12 +5,14 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAuth } from '../hooks/useAuth';
 import { useSettingsStore } from '../store/settingsStore';
 import { registerBackgroundFetch } from '../lib/notifications';
+import { useAppBlocker } from '../hooks/useAppBlocker';
 
 export default function RootLayout() {
   const { user, initialized } = useAuth();
   const router = useRouter();
   const segments = useSegments();
   const { load: loadSettings } = useSettingsStore();
+  useAppBlocker();
 
   useEffect(() => {
     loadSettings();
@@ -47,6 +49,7 @@ export default function RootLayout() {
           <Stack.Screen name="subject/manage" />
           <Stack.Screen name="party/manage" options={{ presentation: 'modal' }} />
           <Stack.Screen name="avatar" />
+          <Stack.Screen name="blocked-apps" />
         </Stack>
       </PaperProvider>
     </GestureHandlerRootView>
