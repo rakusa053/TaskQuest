@@ -1,0 +1,12 @@
+diff --git a/node_modules/expo-json-utils/android/build.gradle b/node_modules/expo-json-utils/android/build.gradle
+index bd5860c..e688567 100644
+--- a/node_modules/expo-json-utils/android/build.gradle
++++ b/node_modules/expo-json-utils/android/build.gradle
+@@ -9,6 +9,7 @@ def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.ab
+ if (expoModulesCorePlugin.exists()) {
+   apply from: expoModulesCorePlugin
+   applyKotlinExpoModulesCorePlugin()
++  useDefaultAndroidSdkVersions()
+ 
+   // Remove this check, but keep the contents after SDK49 support is dropped
+   if (safeExtGet("expoProvidesDefaultConfig", false)) {

@@ -1,0 +1,12 @@
+diff --git a/node_modules/expo-dev-client/android/build.gradle b/node_modules/expo-dev-client/android/build.gradle
+index 45eef05..b28d57e 100644
+--- a/node_modules/expo-dev-client/android/build.gradle
++++ b/node_modules/expo-dev-client/android/build.gradle
+@@ -6,6 +6,7 @@ def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.ab
+ if (expoModulesCorePlugin.exists()) {
+   apply from: expoModulesCorePlugin
+   applyKotlinExpoModulesCorePlugin()
++  useDefaultAndroidSdkVersions()
+ }
+ 
+ buildscript {
