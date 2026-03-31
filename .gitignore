@@ -44,3 +44,6 @@ server/.env.production
 # generated native folders
 /ios
 /android
+
+# module build artifacts
+modules/*/android/build/

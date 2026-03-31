@@ -1,6 +1,7 @@
 package expo.modules.appblocker
 
 import android.app.*
+import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
@@ -8,6 +9,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 
 class AppBlockerService : Service() {
 
@@ -51,8 +53,18 @@ class AppBlockerService : Service() {
   private fun getForegroundApp(): String? {
     val usm = getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return null
     val now = System.currentTimeMillis()
-    val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, now - 5000, now)
-    return stats?.maxByOrNull { it.lastTimeUsed }?.packageName
+    // UsageEvents.MOVE_TO_FOREGROUND で確実にフォアグラウンドアプリを検出
+    val events = usm.queryEvents(now - 2000, now)
+    val event = UsageEvents.Event()
+    var foreground: String? = null
+    while (events.hasNextEvent()) {
+      events.getNextEvent(event)
+      if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+        foreground = event.packageName
+      }
+    }
+    Log.d("AppBlocker", "foreground=$foreground blocked=$blockedPackages")
+    return foreground
   }
 
   /**
@@ -67,9 +79,9 @@ class AppBlockerService : Service() {
   /** 自アプリをフォアグラウンドに持ってくる */
   private fun bringAppToFront() {
     val intent = packageManager.getLaunchIntentForPackage(packageName) ?: return
-    intent.apply {
-      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
-    }
+    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+      Intent.FLAG_ACTIVITY_SINGLE_TOP or
+      Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
     startActivity(intent)
   }
 
