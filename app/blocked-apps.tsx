@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, Platform, Alert } from 'react-native';
+import { View, FlatList, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Switch, ActivityIndicator } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -36,14 +36,7 @@ export default function BlockedAppsScreen() {
   }, []);
 
   const handleRequestPermission = () => {
-    Alert.alert(
-      '使用状況へのアクセス',
-      '「使用状況へのアクセス」で GamingTask を有効にしてから戻ってきてください。',
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        { text: '設定を開く', onPress: () => openUsageSettings() },
-      ]
-    );
+    openUsageSettings();
   };
 
   const handleToggle = async (pkg: string) => {
@@ -80,10 +73,11 @@ export default function BlockedAppsScreen() {
 
       {!hasPermission ? (
         <View style={styles.permBox}>
+          <Text variant="titleSmall" style={styles.permTitle}>権限が必要です</Text>
           <Text variant="bodyMedium" style={styles.permText}>
-            アプリを監視するには「使用状況へのアクセス」権限が必要です。
+            「使用状況へのアクセス」で GamingTask をオンにしてください。
           </Text>
-          <Button label="権限を設定する" onPress={handleRequestPermission} />
+          <Button label="使用状況の設定を開く →" onPress={handleRequestPermission} />
           <Button
             label="設定後にリロード"
             mode="outlined"
@@ -129,6 +123,7 @@ const styles = StyleSheet.create({
   },
   title: { fontWeight: '700', color: '#1f2937' },
   permBox: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 },
+  permTitle: { fontWeight: '700', color: '#1f2937' },
   permText: { color: '#6b7280', textAlign: 'center' },
   row: {
     flexDirection: 'row', alignItems: 'center',

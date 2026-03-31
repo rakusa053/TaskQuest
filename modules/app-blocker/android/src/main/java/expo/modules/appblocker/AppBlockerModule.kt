@@ -21,13 +21,19 @@ class AppBlockerModule : Module() {
       hasUsagePermission()
     }
 
-    /** 使用状況アクセス設定画面を開く */
+    /** 使用状況アクセス設定画面を開く（Android 10+ はアプリ個別ページに直接遷移） */
     Function("openUsageSettings") {
-      ctx.startActivity(
+      val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+          data = android.net.Uri.parse("package:${ctx.packageName}")
+          flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+      } else {
         Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
           flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
-      )
+      }
+      ctx.startActivity(intent)
     }
 
     /** インストール済みの起動可能アプリ一覧（自アプリを除く） */
