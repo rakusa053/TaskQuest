@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
+import android.util.Log
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
@@ -54,19 +55,33 @@ class AppBlockerModule : Module() {
 
     /** ブロック対象パッケージを指定してフォアグラウンド監視サービスを開始 */
     Function("startMonitoring") { blockedPackages: List<String> ->
-      val intent = Intent(ctx, AppBlockerService::class.java).apply {
-        putStringArrayListExtra("blockedPackages", ArrayList(blockedPackages))
-      }
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        ctx.startForegroundService(intent)
-      } else {
-        ctx.startService(intent)
+      Log.d("AppBlocker", "startMonitoring called: $blockedPackages SDK=${Build.VERSION.SDK_INT}")
+      try {
+        val intent = Intent(ctx, AppBlockerService::class.java).apply {
+          putStringArrayListExtra("blockedPackages", ArrayList(blockedPackages))
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          ctx.startForegroundService(intent)
+        } else {
+          ctx.startService(intent)
+        }
+        Log.d("AppBlocker", "startMonitoring success")
+      } catch (e: Exception) {
+        Log.e("AppBlocker", "startMonitoring FAILED: ${e::class.simpleName}: ${e.message}", e)
+        throw e
       }
     }
 
     /** 監視サービスを停止 */
     Function("stopMonitoring") {
-      ctx.stopService(Intent(ctx, AppBlockerService::class.java))
+      Log.d("AppBlocker", "stopMonitoring called")
+      try {
+        ctx.stopService(Intent(ctx, AppBlockerService::class.java))
+        Log.d("AppBlocker", "stopMonitoring success")
+      } catch (e: Exception) {
+        Log.e("AppBlocker", "stopMonitoring FAILED: ${e::class.simpleName}: ${e.message}", e)
+        throw e
+      }
     }
 
     /**

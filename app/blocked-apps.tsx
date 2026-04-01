@@ -40,18 +40,27 @@ export default function BlockedAppsScreen() {
   };
 
   const handleToggle = async (pkg: string) => {
-    await toggle(pkg);
-    // 監視サービスを新しいリストで再起動
-    if (lockEnabled && hasPermission) {
+    console.log('[AppBlocker] handleToggle start', pkg, 'lockEnabled:', lockEnabled, 'hasPermission:', hasPermission);
+    try {
       const updated = blockedPackages.includes(pkg)
         ? blockedPackages.filter((p) => p !== pkg)
         : [...blockedPackages, pkg];
-      if (updated.length > 0) {
-        stopMonitoring();
-        startMonitoring(updated);
-      } else {
-        stopMonitoring();
+      console.log('[AppBlocker] updated list:', updated);
+      await toggle(pkg);
+      console.log('[AppBlocker] toggle store done');
+      if (lockEnabled && hasPermission) {
+        if (updated.length > 0) {
+          console.log('[AppBlocker] startMonitoring...');
+          startMonitoring(updated);
+          console.log('[AppBlocker] startMonitoring done');
+        } else {
+          console.log('[AppBlocker] stopMonitoring (list empty)...');
+          stopMonitoring();
+          console.log('[AppBlocker] stopMonitoring done');
+        }
       }
+    } catch (e) {
+      console.error('[AppBlocker] handleToggle ERROR:', e);
     }
   };
 

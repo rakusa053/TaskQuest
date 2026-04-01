@@ -24,14 +24,38 @@ class AppBlockerService : Service() {
   override fun onBind(intent: Intent?): IBinder? = null
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    Log.d("AppBlocker", "onStartCommand SDK=${Build.VERSION.SDK_INT} packages=$blockedPackages")
     blockedPackages = intent?.getStringArrayListExtra("blockedPackages") ?: emptyList()
+    Log.d("AppBlocker", "onStartCommand updated packages=$blockedPackages")
     createNotificationChannel()
-    startForeground(NOTIFICATION_ID, buildNotification())
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        Log.d("AppBlocker", "startForeground: using 3-arg (API34+)")
+        startForeground(
+          NOTIFICATION_ID,
+          buildNotification(),
+          android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+        )
+      } else {
+        Log.d("AppBlocker", "startForeground: using 2-arg")
+        startForeground(NOTIFICATION_ID, buildNotification())
+      }
+      Log.d("AppBlocker", "startForeground success")
+    } catch (e: Exception) {
+      Log.e("AppBlocker", "startForeground FAILED: ${e::class.simpleName}: ${e.message}", e)
+    }
     startPolling()
     return START_STICKY
   }
 
+  override fun onDestroy() {
+    Log.d("AppBlocker", "onDestroy called")
+    handler.removeCallbacksAndMessages(null)
+    super.onDestroy()
+  }
+
   private fun startPolling() {
+    handler.removeCallbacksAndMessages(null)
     handler.post(object : Runnable {
       override fun run() {
         checkForeground()
@@ -120,8 +144,5 @@ class AppBlockerService : Service() {
     }
   }
 
-  override fun onDestroy() {
-    handler.removeCallbacksAndMessages(null)
-    super.onDestroy()
-  }
 }
+

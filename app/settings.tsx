@@ -1,51 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, Alert } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Switch, Divider, List } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useSettingsStore } from '../store/settingsStore';
-import { hasPin, savePin, clearPin } from '../lib/pinStorage';
 import { Button } from '../components/ui/Button';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { notificationsEnabled, reminderHour, lockEnabled, loaded, load, setNotifications, setLockEnabled } =
+  const { notificationsEnabled, reminderHour, lockEnabled, load, setNotifications, setLockEnabled } =
     useSettingsStore();
-  const [pinSet, setPinSet] = useState(false);
 
   useEffect(() => {
     load();
-    hasPin().then(setPinSet);
   }, []);
-
-  const handleSetPin = () => {
-    Alert.prompt(
-      'PINを設定',
-      '4桁の数字を入力してください',
-      async (pin) => {
-        if (!pin || !/^\d{4}$/.test(pin)) {
-          Alert.alert('エラー', '4桁の数字で入力してください');
-          return;
-        }
-        await savePin(pin);
-        setPinSet(true);
-        Alert.alert('設定完了', 'PINを設定しました');
-      },
-      'plain-text'
-    );
-  };
-
-  const handleClearPin = () => {
-    Alert.alert('PIN削除', 'PINを削除しますか？', [
-      { text: 'キャンセル', style: 'cancel' },
-      {
-        text: '削除', style: 'destructive', onPress: async () => {
-          await clearPin();
-          setPinSet(false);
-        }
-      },
-    ]);
-  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -86,25 +54,6 @@ export default function SettingsScreen() {
             )}
           />
           <List.Item
-            title="緊急解除PIN"
-            description={pinSet ? '設定済み' : '未設定'}
-            right={() => (
-              <Button
-                label={pinSet ? '変更' : '設定'}
-                onPress={handleSetPin}
-                mode="outlined"
-                style={styles.pinBtn}
-              />
-            )}
-          />
-          {pinSet && (
-            <List.Item
-              title="PINを削除"
-              titleStyle={{ color: '#ef4444' }}
-              onPress={handleClearPin}
-            />
-          )}
-          <List.Item
             title="ブロックするアプリを選択"
             description="フォーカスモード中に開けなくするアプリを設定"
             onPress={() => router.push('/blocked-apps')}
@@ -131,5 +80,4 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9fafb' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12 },
   title: { fontWeight: '700', color: '#1f2937' },
-  pinBtn: { alignSelf: 'center' },
 });
