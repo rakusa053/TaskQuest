@@ -1,6 +1,6 @@
 # 会話記録 - 勉強タスク管理アプリ設計
 
-最終更新: 2026-03-27（全フェーズ実装完了）
+最終更新: 2026-04-01（アプリブロッカー クラッシュ修正・ロック画面シンプル化）
 
 ---
 
@@ -85,10 +85,10 @@
 
 ### アプリロック機能
 - タスク未完了中は**ユーザーが設定した特定のアプリのみ**をブロック
-- **Android**: Accessibility Service でフォアグラウンドアプリを検知
+- **Android**: UsageStats + フォアグラウンドサービスで検知（expo native module）
 - **iOS（将来）**: Screen Time API（Apple Developer アカウント取得後）
-- **緊急解除**: 4桁 PIN（初回起動時に強制設定）
-- PIN は `expo-secure-store` に暗号化保存
+- **ロック画面**: PIN入力なし。「タスクに集中しましょう」＋「タスク画面に戻る」ボタンのみ
+- ブロック検知 → GamingTask を前面に出す → `/lock` 画面へ遷移
 
 ### 通知機能
 - 毎日 12:00 に本日の未完了タスク件数をプッシュ通知
@@ -123,6 +123,7 @@
 
 **Q: ずっとロックされる危険はない？**
 → 緊急解除（PIN入力）を追加。初回起動時に強制設定
+→ 後にPIN不要と判断し削除。「タスク画面に戻る」ボタンのみに変更
 
 **Q: 通知機能も追加したい**
 → 毎日 12:00 に本日のタスクをリマインド（expo-notifications 使用）
@@ -201,3 +202,5 @@
 - アプリロック機能は **Expo Dev Build 必須**（Expo Go では動作しない）
 - iOS のアプリロックは **Apple Developer アカウント（年間 $99）** と **Family Controls 権限申請** が必要（現在は未取得）
 - ConoHa VPS 移行時は `.env.production` の URL を更新するだけで対応可能
+- Android 14+ では `startForeground()` に3引数版（`FOREGROUND_SERVICE_TYPE_SPECIAL_USE`）が必須
+- `stopMonitoring()` → `startMonitoring()` の連続呼び出しはクラッシュするため、更新時は `startMonitoring()` のみ呼ぶ

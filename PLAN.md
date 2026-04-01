@@ -1,6 +1,6 @@
 # 勉強タスク管理アプリ 実装計画
 
-最終更新: 2026-03-27（Phase 7-9 完了）
+最終更新: 2026-04-01（Phase 10 アプリブロッカー Android 実装中）
 
 ## Context
 
@@ -360,11 +360,22 @@ useAuth / useTasks / useStats / useCalendarData / useProfile / useGacha / useBos
 5. ショップ・ガチャ・報酬使用画面
 6. プロフィール・アバター選択・科目管理・設定画面
 
-### Phase 7: アプリロック機能 ✅
-- フォーカスモード UI（PIN ロック画面）
-- expo-secure-store に PIN 保存
+### Phase 7: アプリロック機能（基本UI）✅
+- フォーカスモード UI（ロック画面）
 - 設定画面でフォーカスモード ON/OFF
-- ※完全な Android アプリブロックは bare workflow + UsageStats ネイティブモジュールが必要（将来対応）
+- PIN削除 → 「タスクに集中しましょう」＋「タスク画面に戻る」ボタンに変更
+
+### Phase 10: Android ネイティブ アプリブロッカー（実装中）
+- expo native module（app-blocker）実装
+- UsageStats + フォアグラウンドサービス（500ms ポーリング）
+- ブロック対象アプリ選択 UI（blocked-apps.tsx）
+- **既知の問題（未解決）**:
+  - `foreground=null`: エミュレータで UsageEvents が取得できない
+  - BAL制限（Android 14+）: `startActivity()` がサービスからブロックされる
+- **解決済み**:
+  - `startForeground()` クラッシュ（API34+で3引数版に修正）
+  - `stopMonitoring→startMonitoring` 連続呼び出しによる `ForegroundServiceDidNotStartInTimeException` 修正
+  - ロック画面シンプル化（PIN削除）
 
 ### Phase 8: 通知機能 ✅
 - expo-notifications 初期化
