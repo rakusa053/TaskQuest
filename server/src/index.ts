@@ -10,6 +10,7 @@ import gachaRoute from './routes/gacha.js';
 import bossRoute from './routes/boss.js';
 import partyRoute from './routes/party.js';
 import shopRoute from './routes/shop.js';
+import noteRoute from './routes/note.js';
 
 const app = new Hono();
 
@@ -27,6 +28,7 @@ app.route('/api/gacha', gachaRoute);
 app.route('/api/boss', bossRoute);
 app.route('/api/party', partyRoute);
 app.route('/api/shop', shopRoute);
+app.route('/api/note', noteRoute);
 
 const port = Number(process.env.PORT) || 3000;
 console.log(`🚀 Server running on port ${port}`);

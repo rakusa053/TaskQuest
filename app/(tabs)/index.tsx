@@ -49,6 +49,7 @@ export default function TasksScreen() {
         damage: result.bossResult.damage,
       });
       setSnackbar({ msg: `タスク完了！${result.isOnTime ? ' 期限内ボーナス獲得！' : ''}`, type: 'success' });
+      router.push(`/note-check?taskId=${task.id}`);
     } catch {
       setSnackbar({ msg: '完了処理に失敗しました', type: 'error' });
     }
