@@ -1,19 +1,30 @@
 import React, { useEffect } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Switch, Divider, List } from 'react-native-paper';
+import { Text, Switch, Divider, List, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSettingsStore } from '../store/settingsStore';
+import { useTaskStore } from '../store/taskStore';
 import { Button } from '../components/ui/Button';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { notificationsEnabled, reminderHour, lockEnabled, load, setNotifications, setLockEnabled } =
     useSettingsStore();
+  const { tasks, fetch } = useTaskStore();
 
   useEffect(() => {
     load();
+    fetch();
   }, []);
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayCompletedCount = tasks.filter(
+    (t) => t.status === 'completed' && t.completedAt !== null && t.completedAt >= todayStart.getTime()
+  ).length;
+  const snsUnlocked = todayCompletedCount >= 1;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -23,6 +34,18 @@ export default function SettingsScreen() {
         <View style={{ width: 60 }} />
       </View>
       <ScrollView>
+        <Surface style={styles.todayCard}>
+          <View style={styles.todayRow}>
+            <MaterialCommunityIcons name="checkbox-marked-circle-outline" size={28} color="#6366f1" />
+            <View style={styles.todayText}>
+              <Text variant="titleMedium" style={styles.todayCount}>今日の完了タスク: {todayCompletedCount}件</Text>
+              <Text variant="labelSmall" style={styles.todaySub}>
+                {snsUnlocked ? '✅ SNS 解放済み' : '🔒 SNS はタスクを1件完了すると解放されます'}
+              </Text>
+            </View>
+          </View>
+        </Surface>
+
         <List.Section>
           <List.Subheader>通知</List.Subheader>
           <List.Item
@@ -80,4 +103,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9fafb' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12 },
   title: { fontWeight: '700', color: '#1f2937' },
+  todayCard: { margin: 16, borderRadius: 16, padding: 16, backgroundColor: '#fff' },
+  todayRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  todayText: { flex: 1 },
+  todayCount: { color: '#1f2937', fontWeight: '700' },
+  todaySub: { color: '#6b7280', marginTop: 2 },
 });
