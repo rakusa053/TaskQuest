@@ -24,21 +24,28 @@ note.post('/evaluate', async (c) => {
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
+  console.log('[note] apiKey exists:', !!apiKey, 'length:', apiKey?.length);
   if (!apiKey) {
     return c.json({ error: 'GEMINI_API_KEY not configured' }, 500);
   }
 
   // タスクに既に評価済みか確認
+  console.log('[note] checking task:', taskId);
   const taskRef = db.collection('tasks').doc(taskId);
   const taskDoc = await taskRef.get();
+  console.log('[note] task exists:', taskDoc.exists, 'noteEvaluated:', taskDoc.data()?.noteEvaluated);
   if (!taskDoc.exists) return c.json({ error: 'Task not found' }, 404);
-  if (taskDoc.data()?.noteEvaluated) {
+  if (taskDoc.data()?.noteEvaluated || taskDoc.data()?.noteEvaluating) {
     return c.json({ error: 'Already evaluated' }, 400);
   }
 
+  // 評価中フラグを先に立てて二重リクエストを防ぐ
+  await taskRef.set({ noteEvaluating: true }, { merge: true });
+
   // Gemini Vision API 呼び出し
+  console.log('[note] calling Gemini API, imageBase64 length:', imageBase64?.length);
   const geminiRes = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -74,21 +81,28 @@ note.post('/evaluate', async (c) => {
     }
   );
 
+  console.log('[note] Gemini response status:', geminiRes.status);
   if (!geminiRes.ok) {
     const err = await geminiRes.text();
-    console.error('Gemini API error:', err);
+    console.error('[note] Gemini API error:', err);
     return c.json({ error: 'Gemini API failed' }, 500);
   }
 
   const geminiData = await geminiRes.json() as any;
   const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  console.log('[note] Gemini rawText:', rawText.slice(0, 200));
 
   let evaluation: { score: number; comment: string; points: string[]; advice: string };
   try {
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-    evaluation = JSON.parse(jsonMatch?.[0] ?? '{}');
-    if (typeof evaluation.score !== 'number') throw new Error('invalid');
-  } catch {
+    console.log('[note] jsonMatch:', jsonMatch?.[0]?.slice(0, 100));
+    // 制御文字を除去してからパース
+    const sanitized = (jsonMatch?.[0] ?? '{}')
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+    evaluation = JSON.parse(sanitized);
+    if (typeof evaluation.score !== 'number') throw new Error('invalid score');
+  } catch (e) {
+    console.error('[note] parse error:', e);
     return c.json({ error: 'Failed to parse Gemini response' }, 500);
   }
 

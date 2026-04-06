@@ -61,11 +61,11 @@ export default function NoteCheckScreen() {
       { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG, base64: true }
     );
     setImageUri(compressed.uri);
-    handleEvaluate(compressed.base64!);
+    await handleEvaluate(compressed.base64!);
   };
 
   const handleEvaluate = async (base64: string) => {
-    if (!taskId) return;
+    if (!taskId || loading) return;
     setLoading(true);
     setError(null);
     try {
