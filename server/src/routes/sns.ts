@@ -5,32 +5,10 @@ import { authMiddleware } from '../middleware/authMiddleware.js';
 const sns = new Hono<{ Variables: { userId: string } }>();
 sns.use('*', authMiddleware);
 
-// 今日タスクを完了しているか確認
-async function hasTodayCompletedTask(userId: string): Promise<boolean> {
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const todayEnd = todayStart + 24 * 60 * 60 * 1000 - 1;
-
-  // userId のみで絞り込み、completedAt と status はメモリでフィルタ（複合インデックス不要）
-  const snapshot = await db.collection('tasks')
-    .where('userId', '==', userId)
-    .get();
-
-  return snapshot.docs.some(doc => {
-    const d = doc.data();
-    return d.status === 'completed' && d.completedAt >= todayStart && d.completedAt <= todayEnd;
-  });
-}
-
 // タイムライン取得
 sns.get('/feed', async (c) => {
   const userId = c.get('userId');
   const type = c.req.query('type') ?? 'all'; // all | following | party
-
-  const hasCompleted = await hasTodayCompletedTask(userId);
-  if (!hasCompleted) {
-    return c.json({ error: 'task_required' }, 403);
-  }
 
   let targetUserIds: string[] | null = null;
 

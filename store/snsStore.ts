@@ -38,10 +38,9 @@ export const useSnsStore = create<SnsState>((set, get) => ({
     set({ loading: true });
     try {
       const posts = await snsApi.getFeed(get().feedType);
-      set({ posts, locked: false });
-    } catch (e: any) {
-      // 403 = タスク未完了、それ以外のエラーも安全側に倒してロック
-      set({ locked: true, posts: [] });
+      set({ posts });
+    } catch {
+      // サーバー未起動時はスキップ
     } finally {
       set({ loading: false });
     }

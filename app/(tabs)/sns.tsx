@@ -5,6 +5,7 @@ import { Text, FAB } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSnsStore } from '../../store/snsStore';
+import { useTaskStore } from '../../store/taskStore';
 import { PostCard } from '../../components/sns/PostCard';
 import { NewPostModal } from '../../components/sns/NewPostModal';
 import { CommentModal } from '../../components/sns/CommentModal';
@@ -22,7 +23,15 @@ const TABS: { key: FeedType; label: string }[] = [
 
 export default function SnsScreen() {
   const router = useRouter();
-  const { posts, feedType, loading, locked, fetchFeed, setFeedType, toggleLike, deletePost, createPost } = useSnsStore();
+  const { posts, feedType, loading, fetchFeed, setFeedType, toggleLike, deletePost, createPost } = useSnsStore();
+  const { tasks } = useTaskStore();
+
+  // 端末のローカル時刻で今日の完了タスクを判定
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const locked = !tasks.some(
+    (t) => t.status === 'completed' && t.completedAt != null && t.completedAt >= todayStart.getTime()
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [newPostVisible, setNewPostVisible] = useState(false);
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
