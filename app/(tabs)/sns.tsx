@@ -29,10 +29,9 @@ export default function SnsScreen() {
   const [searchVisible, setSearchVisible] = useState(false);
   const [snackbar, setSnackbar] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
-  // TODO: SNS一時ロック中 - 解除時はコメントアウトを外す
-  // useEffect(() => {
-  //   fetchFeed();
-  // }, []);
+  useEffect(() => {
+    fetchFeed();
+  }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
