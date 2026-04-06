@@ -50,9 +50,11 @@ profile.get('/badges', async (c) => {
   const userId = c.get('userId');
   const snapshot = await db.collection('badges')
     .where('userId', '==', userId)
-    .orderBy('unlockedAt', 'desc')
     .get();
-  return c.json(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  const badges = snapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .sort((a: any, b: any) => b.unlockedAt - a.unlockedAt);
+  return c.json(badges);
 });
 
 // タスク完了時のXP・マネー・チケット付与（サーバー側のみ）
