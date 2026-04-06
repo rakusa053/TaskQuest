@@ -25,7 +25,7 @@ export const useSnsStore = create<SnsState>((set, get) => ({
   posts: [],
   feedType: 'all',
   loading: false,
-  locked: false,
+  locked: true,
   comments: [],
   commentsLoading: false,
 
