@@ -15,7 +15,7 @@ interface Props {
   xp: number;
 }
 
-export function XPBar({ level, xp }: Props) {
+export function XPBar({ level = 1, xp = 0 }: Props) {
   const { next, progress } = getLevelProgress(level, xp);
   const needed = next - xp;
 
