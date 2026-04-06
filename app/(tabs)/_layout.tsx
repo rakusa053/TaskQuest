@@ -38,11 +38,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="stats"
+        name="sns"
         options={{
-          title: '統計',
+          title: 'SNS',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="chart-bar" color={color} size={size} />
+            <MaterialCommunityIcons name="newspaper-variant-outline" color={color} size={size} />
           ),
         }}
       />

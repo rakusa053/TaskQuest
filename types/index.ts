@@ -154,3 +154,43 @@ export interface StreakInfo {
   streak?: number;
   longestStreak?: number;
 }
+
+// ===== SNS =====
+export interface Post {
+  id: string;
+  userId: string;
+  displayName: string;
+  avatarId: string;
+  text: string;
+  taskId: string | null;
+  isAutoPost: boolean;
+  likesCount: number;
+  commentsCount: number;
+  createdAt: number;
+  likedByMe?: boolean;
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  displayName: string;
+  text: string;
+  createdAt: number;
+}
+
+export interface Follow {
+  id: string;
+  followerId: string;
+  followingId: string;
+  createdAt: number;
+}
+
+export interface SnsUser {
+  userId: string;
+  displayName: string;
+  avatarId: string;
+  level: number;
+  followingMe?: boolean;
+  followedByMe?: boolean;
+}

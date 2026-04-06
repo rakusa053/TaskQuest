@@ -93,6 +93,25 @@ profile.post('/xp', async (c) => {
 
   await ref.set(updates, { merge: true });
 
+  // SNS 自動投稿
+  try {
+    const taskDoc = await db.collection('tasks').doc(taskId).get();
+    const taskTitle = taskDoc.data()?.title ?? 'タスク';
+    await db.collection('posts').add({
+      userId,
+      displayName: data.displayName ?? 'プレイヤー',
+      avatarId: data.avatarId ?? 'default',
+      text: `${taskTitle}を完了しました！`,
+      taskId,
+      isAutoPost: true,
+      likesCount: 0,
+      commentsCount: 0,
+      createdAt: Date.now(),
+    });
+  } catch {
+    // 自動投稿失敗はメイン処理に影響させない
+  }
+
   // バッジ判定
   const newBadges = await checkAndAwardBadges(userId, { ...data, ...updates });
 
