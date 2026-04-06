@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, FlatList, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, TextInput, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -9,7 +9,7 @@ import { EmptyState } from '../../components/ui/EmptyState';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const PRESET_COLORS = ['#6366f1', '#f59e0b', '#22c55e', '#ef4444', '#06b6d4', '#a855f7', '#ec4899', '#84cc16'];
-const PRESET_ICONS = ['book', 'calculator', 'flask', 'earth', 'music-note', 'dumbbell', 'code-tags', 'pencil'];
+const PRESET_ICONS = ['book', 'calculator', 'flask', 'earth', 'music-note', 'weight-lifter', 'code-tags', 'pencil'];
 
 export default function SubjectManageScreen() {
   const router = useRouter();
@@ -58,23 +58,23 @@ export default function SubjectManageScreen() {
         <Text variant="labelMedium" style={styles.label}>カラー</Text>
         <View style={styles.colorRow}>
           {PRESET_COLORS.map((c) => (
-            <View
+            <TouchableOpacity
               key={c}
               style={[styles.colorDot, { backgroundColor: c }, color === c && styles.colorDotSelected]}
-              onTouchEnd={() => setColor(c)}
+              onPress={() => setColor(c)}
             />
           ))}
         </View>
         <Text variant="labelMedium" style={styles.label}>アイコン</Text>
         <View style={styles.iconRow}>
           {PRESET_ICONS.map((ic) => (
-            <View
+            <TouchableOpacity
               key={ic}
               style={[styles.iconCell, icon === ic && styles.iconCellSelected]}
-              onTouchEnd={() => setIcon(ic)}
+              onPress={() => setIcon(ic)}
             >
               <MaterialCommunityIcons name={ic as any} size={20} color={icon === ic ? '#6366f1' : '#6b7280'} />
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
         <Button label="科目を追加" onPress={handleCreate} loading={loading} />
