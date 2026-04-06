@@ -1,6 +1,6 @@
 # 会話記録 - 勉強タスク管理アプリ設計
 
-最終更新: 2026-04-06（**ver.2 完成** / git tag: v2.0）
+最終更新: 2026-04-06（**ver.3 完成** / git tag: v3.0）
 
 ---
 
@@ -204,6 +204,17 @@
 - ConoHa VPS 移行時は `.env.production` の URL を更新するだけで対応可能
 - Android 14+ では `startForeground()` に3引数版（`FOREGROUND_SERVICE_TYPE_SPECIAL_USE`）が必須
 - `stopMonitoring()` → `startMonitoring()` の連続呼び出しはクラッシュするため、更新時は `startMonitoring()` のみ呼ぶ
+
+### SNS 機能（ver.3）
+- 統計タブを SNS タブに置き換え（`app/(tabs)/stats.tsx` 削除）
+- 投稿: 自由テキスト140文字 + タスク完了時に自動投稿（`POST /api/profile/xp` で posts コレクションに追加）
+- タイムライン: 全体 / フォロー中 / パーティ の3タブ
+- いいね・コメント・フォロー / アンフォロー・ユーザー検索
+- SNS ロック: 端末ローカル時刻で今日の完了タスクを判定（サーバー側はUTCズレで誤判定するためフロントで判定）
+- タスク完了時に `useTasks.completeTask` から `fetchFeed` を呼び自動解放
+- Firestore 複合インデックスを使わないようにメモリ内フィルタに統一
+- `/api/profile/badges` の orderBy を削除しメモリソートに変更（複合インデックス不要化）
+- `/api/profile/xp` のレスポンスに `profile` を追加（profileStore が undefined をセットするバグ修正）
 
 ### ノート評価機能（ver.2）
 - カメラ撮影 → `expo-image-manipulator` で800px・quality0.6に圧縮 → base64でサーバーへ送信
