@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useTaskStore } from '../store/taskStore';
 import { useProfileStore } from '../store/profileStore';
 import { useBossStore } from '../store/bossStore';
+import { useSnsStore } from '../store/snsStore';
 import { statsApi } from '../api/statsApi';
 import type { Task } from '../types';
 
@@ -9,6 +10,7 @@ export function useTasks(params?: { status?: string; subjectId?: string; date?: 
   const { tasks, loading, fetch, create, update, remove } = useTaskStore();
   const { rewardXp, profile } = useProfileStore();
   const { damage: damageBoss } = useBossStore();
+  const { fetchFeed } = useSnsStore();
 
   useEffect(() => {
     fetch(params);
@@ -50,6 +52,9 @@ export function useTasks(params?: { status?: string; subjectId?: string; date?: 
       isOnTime,
       displayName: profile?.displayName,
     });
+
+    // SNS ロック解除チェック
+    fetchFeed();
 
     return { updated, xpResult, bossResult, isOnTime };
   };
