@@ -29,9 +29,10 @@ export default function SnsScreen() {
   const [searchVisible, setSearchVisible] = useState(false);
   const [snackbar, setSnackbar] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
-  useEffect(() => {
-    fetchFeed();
-  }, []);
+  // テスト用: SNS を常にロック
+  // useEffect(() => {
+  //   fetchFeed();
+  // }, []);
 
   const handleRefresh = async () => {
     setRefreshing(true);
