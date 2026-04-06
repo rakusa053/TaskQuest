@@ -1,6 +1,6 @@
 # 会話記録 - 勉強タスク管理アプリ設計
 
-最終更新: 2026-04-02（**ver.1 完成** / git tag: v1.0）
+最終更新: 2026-04-06（**ver.2 完成** / git tag: v2.0）
 
 ---
 
@@ -204,3 +204,12 @@
 - ConoHa VPS 移行時は `.env.production` の URL を更新するだけで対応可能
 - Android 14+ では `startForeground()` に3引数版（`FOREGROUND_SERVICE_TYPE_SPECIAL_USE`）が必須
 - `stopMonitoring()` → `startMonitoring()` の連続呼び出しはクラッシュするため、更新時は `startMonitoring()` のみ呼ぶ
+
+### ノート評価機能（ver.2）
+- カメラ撮影 → `expo-image-manipulator` で800px・quality0.6に圧縮 → base64でサーバーへ送信
+- サーバーで Gemini 2.5 Flash Vision API に投げて評価（score/comment/points/advice）
+- スコアに応じてXP・コインボーナス付与（80+:30XP/15coin、60+:20XP/10coin、40+:10XP/5coin）
+- タスクごと1回制限（`noteEvaluating` + `noteEvaluated` フラグで二重防止）
+- Gemini APIは処理に約17秒かかるためaxiosタイムアウトを60秒に設定
+- モデル: `gemini-2.5-flash`（2.0-flashは新規ユーザー不可）
+- `npm start` でIPアドレスを自動取得するよう設定済み
