@@ -40,9 +40,8 @@ export const useSnsStore = create<SnsState>((set, get) => ({
       const posts = await snsApi.getFeed(get().feedType);
       set({ posts, locked: false });
     } catch (e: any) {
-      if (e?.response?.status === 403) {
-        set({ locked: true, posts: [] });
-      }
+      // 403 = タスク未完了、それ以外のエラーも安全側に倒してロック
+      set({ locked: true, posts: [] });
     } finally {
       set({ loading: false });
     }
