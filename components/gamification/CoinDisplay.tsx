@@ -14,7 +14,7 @@ export function CoinDisplay({ amount, size = 'medium' }: Props) {
 
   return (
     <View style={styles.row}>
-      <MaterialCommunityIcons name={"coin" as any} size={iconSize} color="#f59e0b" />
+      <MaterialCommunityIcons name="circle-multiple" size={iconSize} color="#f59e0b" />
       <Text variant={variant as any} style={styles.amount}>{amount.toLocaleString()}</Text>
     </View>
   );
