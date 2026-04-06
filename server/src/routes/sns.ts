@@ -11,14 +11,15 @@ async function hasTodayCompletedTask(userId: string): Promise<boolean> {
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const todayEnd = todayStart + 24 * 60 * 60 * 1000 - 1;
 
-  // userId + completedAt の2条件のみ（複合インデックス不要）、statusはメモリで絞り込む
+  // userId のみで絞り込み、completedAt と status はメモリでフィルタ（複合インデックス不要）
   const snapshot = await db.collection('tasks')
     .where('userId', '==', userId)
-    .where('completedAt', '>=', todayStart)
-    .where('completedAt', '<=', todayEnd)
     .get();
 
-  return snapshot.docs.some(doc => doc.data().status === 'completed');
+  return snapshot.docs.some(doc => {
+    const d = doc.data();
+    return d.status === 'completed' && d.completedAt >= todayStart && d.completedAt <= todayEnd;
+  });
 }
 
 // タイムライン取得

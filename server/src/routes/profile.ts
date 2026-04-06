@@ -122,6 +122,7 @@ profile.post('/xp', async (c) => {
     newLevel,
     leveledUp,
     newBadges,
+    profile: { id: userId, ...data, ...updates },
   });
 });
 
