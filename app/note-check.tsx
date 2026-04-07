@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, StyleSheet, Image, ScrollView, Animated,
+  View, StyleSheet, Image, ScrollView, Animated, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import * as ImageManipulator from 'expo-image-manipulator';
 import { Button } from '../components/ui/Button';
 import { evaluateNote, NoteEvaluationResult } from '../api/noteApi';
 import { useProfileStore } from '../store/profileStore';
@@ -41,6 +39,9 @@ export default function NoteCheckScreen() {
   }, [result]);
 
   const handlePickImage = async () => {
+    if (Platform.OS === 'web') return;
+    const ImagePicker = await import('expo-image-picker');
+    const ImageManipulator = await import('expo-image-manipulator');
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       setError('カメラの権限が必要です');
@@ -105,7 +106,11 @@ export default function NoteCheckScreen() {
               <Image source={{ uri: imageUri }} style={styles.preview} resizeMode="contain" />
             )}
             {error && <Text style={styles.error}>{error}</Text>}
-            <Button label="カメラで撮影する" onPress={handlePickImage} mode="contained" />
+            {Platform.OS !== 'web' ? (
+              <Button label="カメラで撮影する" onPress={handlePickImage} mode="contained" />
+            ) : (
+              <Text style={styles.webNote}>📷 カメラ機能はアプリ版のみ対応しています</Text>
+            )}
             <Button label="スキップ" onPress={() => router.back()} mode="text" />
           </>
         )}
@@ -178,6 +183,7 @@ const styles = StyleSheet.create({
   error: { color: '#ef4444', textAlign: 'center' },
   loadingBox: { alignItems: 'center', gap: 16, marginTop: 60 },
   loadingText: { color: '#6b7280' },
+  webNote: { color: '#9ca3af', textAlign: 'center', fontSize: 14 },
   scoreBox: {
     alignSelf: 'center', borderWidth: 4, borderRadius: 80,
     width: 140, height: 140,

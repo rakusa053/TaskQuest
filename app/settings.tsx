@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Switch, Divider, List, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -46,45 +46,49 @@ export default function SettingsScreen() {
           </View>
         </Surface>
 
-        <List.Section>
-          <List.Subheader>通知</List.Subheader>
-          <List.Item
-            title="デイリーリマインド"
-            description={`毎日 ${String(reminderHour).padStart(2, '0')}:00 に通知`}
-            right={() => (
-              <Switch
-                value={notificationsEnabled}
-                onValueChange={setNotifications}
-                color="#6366f1"
+        {Platform.OS !== 'web' && (
+          <>
+            <List.Section>
+              <List.Subheader>通知</List.Subheader>
+              <List.Item
+                title="デイリーリマインド"
+                description={`毎日 ${String(reminderHour).padStart(2, '0')}:00 に通知`}
+                right={() => (
+                  <Switch
+                    value={notificationsEnabled}
+                    onValueChange={setNotifications}
+                    color="#6366f1"
+                  />
+                )}
               />
-            )}
-          />
-        </List.Section>
+            </List.Section>
 
-        <Divider />
+            <Divider />
 
-        <List.Section>
-          <List.Subheader>フォーカスモード（アプリロック）</List.Subheader>
-          <List.Item
-            title="フォーカスモード"
-            description="タスク完了でガチャ報酬を使い特定アプリを解放できます"
-            right={() => (
-              <Switch
-                value={lockEnabled}
-                onValueChange={setLockEnabled}
-                color="#6366f1"
+            <List.Section>
+              <List.Subheader>フォーカスモード（アプリロック）</List.Subheader>
+              <List.Item
+                title="フォーカスモード"
+                description="タスク完了でガチャ報酬を使い特定アプリを解放できます"
+                right={() => (
+                  <Switch
+                    value={lockEnabled}
+                    onValueChange={setLockEnabled}
+                    color="#6366f1"
+                  />
+                )}
               />
-            )}
-          />
-          <List.Item
-            title="ブロックするアプリを選択"
-            description="フォーカスモード中に開けなくするアプリを設定"
-            onPress={() => router.push('/blocked-apps')}
-            right={(props) => <List.Icon {...props} icon="chevron-right" />}
-          />
-        </List.Section>
+              <List.Item
+                title="ブロックするアプリを選択"
+                description="フォーカスモード中に開けなくするアプリを設定"
+                onPress={() => router.push('/blocked-apps')}
+                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              />
+            </List.Section>
 
-        <Divider />
+            <Divider />
+          </>
+        )}
 
         <List.Section>
           <List.Subheader>アカウント</List.Subheader>
