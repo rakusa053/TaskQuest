@@ -62,8 +62,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   update: async (data) => {
     try {
-      const profile = await profileApi.update(data);
-      set({ profile });
+      await profileApi.update(data);
+      await get().fetch();
     } catch {
       // サーバー未起動時はスキップ
     }

@@ -42,7 +42,8 @@ profile.put('/', async (c) => {
   allowed.forEach(k => { if (body[k] !== undefined) updates[k] = body[k]; });
 
   await db.collection('profiles').doc(userId).set(updates, { merge: true });
-  return c.json({ success: true });
+  const updated = await db.collection('profiles').doc(userId).get();
+  return c.json({ id: userId, ...updated.data() });
 });
 
 // バッジ一覧取得
