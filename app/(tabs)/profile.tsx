@@ -10,12 +10,23 @@ import { CoinDisplay } from '../../components/gamification/CoinDisplay';
 import { BadgeCard } from '../../components/gamification/BadgeCard';
 import { Button } from '../../components/ui/Button';
 
+const AVATAR_MAP: Record<string, string> = {
+  default: '👤',
+  scholar: '📚',
+  warrior: '⚔️',
+  mage: '🔮',
+  hero: '🦸',
+  ninja: '🥷',
+};
+
 export default function ProfileScreen() {
   const router = useRouter();
   const { profile, badges } = useProfile();
   const { logout } = useAuthStore();
 
   if (!profile) return null;
+
+  const avatarLabel = AVATAR_MAP[profile.avatarId ?? 'default'] ?? '👤';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,7 +35,7 @@ export default function ProfileScreen() {
         <Surface style={styles.card}>
           <View style={styles.avatarRow}>
             <TouchableOpacity onPress={() => router.push('/avatar')}>
-              <Avatar.Text size={72} label={(profile.displayName ?? '?').charAt(0).toUpperCase()} style={styles.avatar} />
+              <Avatar.Text size={72} label={avatarLabel} style={styles.avatar} />
             </TouchableOpacity>
             <View style={styles.info}>
               <Text variant="titleLarge" style={styles.name}>{profile.displayName}</Text>
