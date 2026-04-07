@@ -33,7 +33,6 @@ sessions.get('/stats/weekly', async (c) => {
 
   const snapshot = await db.collection('sessions')
     .where('userId', '==', userId)
-    .where('startedAt', '>=', weekAgo)
     .get();
 
   const days: Record<string, number> = {};
@@ -41,6 +40,7 @@ sessions.get('/stats/weekly', async (c) => {
 
   snapshot.docs.forEach(doc => {
     const data = doc.data();
+    if ((data.startedAt ?? 0) < weekAgo) return;
     days[data.date] = (days[data.date] ?? 0) + data.durationMinutes;
     totalMinutes += data.durationMinutes;
   });
@@ -55,11 +55,13 @@ sessions.get('/stats/weekly', async (c) => {
 
   const tasksSnapshot = await db.collection('tasks')
     .where('userId', '==', userId)
-    .where('status', '==', 'completed')
-    .where('completedAt', '>=', weekAgo)
     .get();
+  const completedTasks = tasksSnapshot.docs.filter(doc => {
+    const d = doc.data();
+    return d.status === 'completed' && (d.completedAt ?? 0) >= weekAgo;
+  }).length;
 
-  return c.json({ days: result, totalMinutes, completedTasks: tasksSnapshot.size });
+  return c.json({ days: result, totalMinutes, completedTasks });
 });
 
 // ストリーク情報

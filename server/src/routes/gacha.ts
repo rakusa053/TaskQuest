@@ -59,10 +59,12 @@ gacha.get('/results', async (c) => {
   const userId = c.get('userId');
   const snapshot = await db.collection('gachaResults')
     .where('userId', '==', userId)
-    .where('used', '==', false)
-    .orderBy('createdAt', 'desc')
     .get();
-  return c.json(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  const results = snapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .filter((r: any) => !r.used)
+    .sort((a: any, b: any) => b.createdAt - a.createdAt);
+  return c.json(results);
 });
 
 // 報酬を使う（アプリ解放タイマー起動）

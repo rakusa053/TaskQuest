@@ -11,19 +11,19 @@ tasks.get('/', async (c) => {
   const userId = c.get('userId');
   const { status, subjectId, date } = c.req.query();
 
-  let query = db.collection('tasks').where('userId', '==', userId);
-  if (status) query = query.where('status', '==', status) as any;
-  if (subjectId) query = query.where('subjectId', '==', subjectId) as any;
+  // userId のみで取得し、フィルタ・ソートはメモリで処理（複合インデックス不要）
+  const snapshot = await db.collection('tasks').where('userId', '==', userId).get();
+  let taskList: any[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-  const snapshot = await query.orderBy('createdAt', 'desc').get();
-  const taskList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+  if (status) taskList = taskList.filter(t => t.status === status);
+  if (subjectId) taskList = taskList.filter(t => t.subjectId === subjectId);
   if (date) {
     const start = new Date(date).setHours(0, 0, 0, 0);
     const end = new Date(date).setHours(23, 59, 59, 999);
-    return c.json(taskList.filter((t: any) => t.dueDate >= start && t.dueDate <= end));
+    taskList = taskList.filter(t => t.dueDate >= start && t.dueDate <= end);
   }
 
+  taskList.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
   return c.json(taskList);
 });
 
