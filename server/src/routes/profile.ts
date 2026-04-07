@@ -119,9 +119,9 @@ profile.post('/xp', async (c) => {
   const newBadges = await checkAndAwardBadges(userId, { ...data, ...updates });
 
   return c.json({
-    xpGain,
-    moneyGain: moneyGain + levelUpMoneyBonus,
-    ticketGain: ticketGain + levelUpTicketBonus,
+    xp: xpGain,
+    money: moneyGain + levelUpMoneyBonus,
+    gachaTickets: ticketGain + levelUpTicketBonus,
     newLevel,
     leveledUp,
     newBadges,

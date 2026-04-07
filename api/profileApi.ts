@@ -6,7 +6,7 @@ interface XpRewardResponse {
   money: number;
   gachaTickets: number;
   newLevel?: number;
-  levelUpBonus?: { money: number; tickets: number };
+  leveledUp?: boolean;
   newBadges?: Badge[];
   profile: UserProfile;
 }

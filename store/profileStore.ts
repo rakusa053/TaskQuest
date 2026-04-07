@@ -50,7 +50,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     try {
       const result = await profileApi.rewardXp(data);
       if (result.profile) set({ profile: result.profile });
-      if (result.newLevel) set({ lastLevelUp: result.newLevel });
+      if (result.leveledUp && result.newLevel) set({ lastLevelUp: result.newLevel });
       if (result.newBadges?.length) {
         set({ badges: [...get().badges, ...result.newBadges] });
       }
