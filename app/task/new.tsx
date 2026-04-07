@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, ScrollView, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, TextInput, SegmentedButtons } from 'react-native-paper';
+import { Text, TextInput, SegmentedButtons, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTaskStore } from '../../store/taskStore';
 import { useSubjectStore } from '../../store/subjectStore';
 import { Button } from '../../components/ui/Button';
@@ -15,6 +17,8 @@ export default function NewTaskScreen() {
   const [subjectId, setSubjectId] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [estimatedMinutes, setEstimatedMinutes] = useState('30');
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
@@ -26,7 +30,7 @@ export default function NewTaskScreen() {
         subjectId: subjectId || (subjects[0]?.id ?? ''),
         status: 'pending',
         priority,
-        dueDate: null,
+        dueDate: dueDate ? dueDate.getTime() : null,
         estimatedMinutes: parseInt(estimatedMinutes) || 30,
         actualMinutes: 0,
         completedAt: null,
@@ -38,6 +42,9 @@ export default function NewTaskScreen() {
       setLoading(false);
     }
   };
+
+  const formatDate = (date: Date) =>
+    `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -75,6 +82,34 @@ export default function NewTaskScreen() {
           style={styles.input}
         />
 
+        <Text variant="labelLarge" style={styles.label}>期限日</Text>
+        <TouchableOpacity onPress={() => setShowPicker(true)}>
+          <Surface style={styles.dateRow}>
+            <MaterialCommunityIcons name="calendar" size={20} color="#6366f1" />
+            <Text style={[styles.dateText, !dueDate && styles.datePlaceholder]}>
+              {dueDate ? formatDate(dueDate) : '期限日を設定'}
+            </Text>
+            {dueDate && (
+              <TouchableOpacity onPress={() => setDueDate(null)} hitSlop={8}>
+                <MaterialCommunityIcons name="close-circle" size={18} color="#9ca3af" />
+              </TouchableOpacity>
+            )}
+          </Surface>
+        </TouchableOpacity>
+
+        {showPicker && (
+          <DateTimePicker
+            value={dueDate ?? new Date()}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            minimumDate={new Date()}
+            onChange={(_, date) => {
+              setShowPicker(Platform.OS === 'ios');
+              if (date) setDueDate(date);
+            }}
+          />
+        )}
+
         {subjects.length > 0 && (
           <>
             <Text variant="labelLarge" style={styles.label}>科目</Text>
@@ -97,4 +132,7 @@ const styles = StyleSheet.create({
   content: { padding: 16, gap: 12 },
   label: { color: '#374151', marginTop: 4 },
   input: { backgroundColor: '#fff' },
+  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: 12, backgroundColor: '#fff' },
+  dateText: { flex: 1, fontSize: 15, color: '#1f2937' },
+  datePlaceholder: { color: '#9ca3af' },
 });
