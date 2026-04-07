@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Switch, Divider, List, Surface } from 'react-native-paper';
+import { Text, Switch, Divider, List, Surface, TextInput } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSettingsStore } from '../store/settingsStore';
 import { useTaskStore } from '../store/taskStore';
+import { useProfileStore } from '../store/profileStore';
 import { Button } from '../components/ui/Button';
 
 export default function SettingsScreen() {
@@ -13,11 +14,31 @@ export default function SettingsScreen() {
   const { notificationsEnabled, reminderHour, lockEnabled, load, setNotifications, setLockEnabled } =
     useSettingsStore();
   const { tasks, fetch } = useTaskStore();
+  const { profile, update } = useProfileStore();
+  const [displayName, setDisplayName] = useState('');
+  const [nameLoading, setNameLoading] = useState(false);
 
   useEffect(() => {
     load();
     fetch();
   }, []);
+
+  useEffect(() => {
+    if (profile?.displayName) setDisplayName(profile.displayName);
+  }, [profile?.displayName]);
+
+  const handleSaveName = async () => {
+    if (!displayName.trim()) { Alert.alert('エラー', 'ニックネームを入力してください'); return; }
+    setNameLoading(true);
+    try {
+      await update({ displayName: displayName.trim() });
+      Alert.alert('保存しました');
+    } catch {
+      Alert.alert('エラー', '保存に失敗しました');
+    } finally {
+      setNameLoading(false);
+    }
+  };
 
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -88,6 +109,16 @@ export default function SettingsScreen() {
 
         <List.Section>
           <List.Subheader>アカウント</List.Subheader>
+          <View style={styles.nameSection}>
+            <TextInput
+              label="ニックネーム"
+              value={displayName}
+              onChangeText={setDisplayName}
+              mode="outlined"
+              style={styles.nameInput}
+            />
+            <Button label="保存" onPress={handleSaveName} loading={nameLoading} style={styles.nameBtn} />
+          </View>
           <List.Item
             title="科目管理"
             onPress={() => router.push('/subject/manage')}
@@ -108,4 +139,7 @@ const styles = StyleSheet.create({
   todayText: { flex: 1 },
   todayCount: { color: '#1f2937', fontWeight: '700' },
   todaySub: { color: '#6b7280', marginTop: 2 },
+  nameSection: { paddingHorizontal: 16, paddingBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  nameInput: { flex: 1, backgroundColor: '#fff' },
+  nameBtn: { marginTop: 6 },
 });
