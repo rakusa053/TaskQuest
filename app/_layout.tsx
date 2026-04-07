@@ -50,6 +50,7 @@ export default function RootLayout() {
           <Stack.Screen name="party/manage" options={{ presentation: 'modal' }} />
           <Stack.Screen name="avatar" />
           <Stack.Screen name="blocked-apps" />
+          <Stack.Screen name="note-check" options={{ presentation: 'modal' }} />
         </Stack>
       </PaperProvider>
     </GestureHandlerRootView>
