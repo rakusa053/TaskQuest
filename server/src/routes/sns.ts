@@ -167,9 +167,11 @@ sns.get('/posts/:id/comments', async (c) => {
   const postId = c.req.param('id');
   const snap = await db.collection('comments')
     .where('postId', '==', postId)
-    .orderBy('createdAt', 'asc')
     .get();
-  return c.json(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  const comments = snap.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
+    .sort((a: any, b: any) => a.createdAt - b.createdAt);
+  return c.json(comments);
 });
 
 // コメント追加
@@ -190,6 +192,7 @@ sns.post('/posts/:id/comments', async (c) => {
     postId,
     userId,
     displayName: profileData.displayName ?? 'プレイヤー',
+    avatarId: profileData.avatarId ?? 'default',
     text: text.trim(),
     createdAt: now,
   };

@@ -6,6 +6,7 @@ import {
 import { Text, Surface } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSnsStore } from '../../store/snsStore';
+import { getAvatarLabel } from '../../utils/avatarUtils';
 import { useAuthStore } from '../../store/authStore';
 import { formatDistanceToNow } from '../../utils/dateUtils';
 import type { Comment } from '../../types';
@@ -39,7 +40,7 @@ export function CommentModal({ postId, onClose }: Props) {
   const renderComment = ({ item }: { item: Comment }) => (
     <View style={styles.comment}>
       <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{item.displayName.charAt(0)}</Text>
+        <Text style={styles.avatarText}>{getAvatarLabel(item.avatarId)}</Text>
       </View>
       <View style={styles.commentBody}>
         <View style={styles.commentHeader}>

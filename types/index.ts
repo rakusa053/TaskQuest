@@ -175,6 +175,7 @@ export interface Comment {
   postId: string;
   userId: string;
   displayName: string;
+  avatarId?: string;
   text: string;
   createdAt: number;
 }

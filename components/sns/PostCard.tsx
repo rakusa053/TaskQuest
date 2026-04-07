@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { Post } from '../../types';
 import { useAuthStore } from '../../store/authStore';
 import { formatDistanceToNow } from '../../utils/dateUtils';
+import { getAvatarLabel } from '../../utils/avatarUtils';
 
 interface Props {
   post: Post;
@@ -21,7 +22,7 @@ export function PostCard({ post, onLike, onComment, onDelete }: Props) {
     <Surface style={styles.card}>
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{post.displayName.charAt(0)}</Text>
+          <Text style={styles.avatarText}>{getAvatarLabel(post.avatarId)}</Text>
         </View>
         <View style={styles.meta}>
           <Text variant="labelLarge" style={styles.name}>{post.displayName}</Text>

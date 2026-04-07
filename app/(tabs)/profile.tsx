@@ -9,15 +9,7 @@ import { XPBar } from '../../components/gamification/XPBar';
 import { CoinDisplay } from '../../components/gamification/CoinDisplay';
 import { BadgeCard } from '../../components/gamification/BadgeCard';
 import { Button } from '../../components/ui/Button';
-
-const AVATAR_MAP: Record<string, string> = {
-  default: '👤',
-  scholar: '📚',
-  warrior: '⚔️',
-  mage: '🔮',
-  hero: '🦸',
-  ninja: '🥷',
-};
+import { getAvatarLabel } from '../../utils/avatarUtils';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -26,7 +18,7 @@ export default function ProfileScreen() {
 
   if (!profile) return null;
 
-  const avatarLabel = AVATAR_MAP[profile.avatarId ?? 'default'] ?? '👤';
+  const avatarLabel = getAvatarLabel(profile.avatarId);
 
   return (
     <SafeAreaView style={styles.container}>

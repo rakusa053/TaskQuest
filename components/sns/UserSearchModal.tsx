@@ -6,6 +6,7 @@ import {
 import { Text, Surface } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { snsApi } from '../../api/snsApi';
+import { getAvatarLabel } from '../../utils/avatarUtils';
 import type { SnsUser } from '../../types';
 
 interface Props {
@@ -42,7 +43,7 @@ export function UserSearchModal({ visible, onClose }: Props) {
   const renderUser = ({ item }: { item: SnsUser }) => (
     <View style={styles.userRow}>
       <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{item.displayName.charAt(0)}</Text>
+        <Text style={styles.avatarText}>{getAvatarLabel(item.avatarId)}</Text>
       </View>
       <View style={styles.userInfo}>
         <Text style={styles.userName}>{item.displayName}</Text>
