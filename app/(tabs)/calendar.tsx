@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from 'react-native-paper';
 import { Calendar } from 'react-native-calendars';
 import { useCalendarData } from '../../hooks/useCalendarData';
 import { useSubjectStore } from '../../store/subjectStore';
+import { useTaskStore } from '../../store/taskStore';
 import { TaskCard } from '../../components/tasks/TaskCard';
 import { EmptyState } from '../../components/ui/EmptyState';
 
+function toLocalDateString(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 export default function CalendarScreen() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = toLocalDateString(new Date());
   const [selected, setSelected] = useState(today);
+  const { fetch } = useTaskStore();
+
+  useEffect(() => { fetch(); }, []);
   const { markedDates, tasksByDate } = useCalendarData();
   const { subjects } = useSubjectStore();
 

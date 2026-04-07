@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
 import { useTaskStore } from '../store/taskStore';
 
+function toLocalDateString(ts: number): string {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export function useCalendarData() {
   const { tasks } = useTaskStore();
 
@@ -9,7 +14,7 @@ export function useCalendarData() {
 
     tasks.forEach((task) => {
       if (!task.dueDate) return;
-      const date = new Date(task.dueDate).toISOString().split('T')[0];
+      const date = toLocalDateString(task.dueDate);
       if (!marks[date]) marks[date] = { dots: [] };
 
       const color =
@@ -27,7 +32,7 @@ export function useCalendarData() {
     const map: Record<string, typeof tasks> = {};
     tasks.forEach((task) => {
       if (!task.dueDate) return;
-      const date = new Date(task.dueDate).toISOString().split('T')[0];
+      const date = toLocalDateString(task.dueDate);
       if (!map[date]) map[date] = [];
       map[date].push(task);
     });
