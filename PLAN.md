@@ -367,6 +367,18 @@ useAuth / useTasks / useStats / useCalendarData / useProfile / useGacha / useBos
 
 ---
 
+## ✅ ver.4 完成（2026-04-08 / git tag: v4.0）
+
+ver.4 で追加した機能：
+- **Web 対応**: `npm start --web` でブラウザからアクセス可能
+- ネイティブモジュールのWeb用スタブ（app-blocker、expo-secure-store、expo-notifications）
+- Firebase 認証の Web 永続化対応（browserLocalPersistence）
+- DatePickerField コンポーネント（ネイティブ: DateTimePicker / Web: `<input type="date">`）
+- 設定画面・ノート評価画面でWeb非対応機能を非表示
+- アプリブロッカーを `requireOptionalNativeModule` に変更（Web クラッシュ修正）
+
+---
+
 ## ✅ ver.3 完成（2026-04-06 / git tag: v3.0）
 
 ver.3 で追加した機能：
