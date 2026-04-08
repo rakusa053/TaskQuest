@@ -1,4 +1,4 @@
-{$DOMAIN} {
+:80 {
     # API リクエストは hono-api コンテナへ
     handle /api/* {
         reverse_proxy hono-api:3000
@@ -11,3 +11,4 @@
         try_files {path} /index.html
     }
 }
+
