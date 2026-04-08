@@ -3,14 +3,11 @@ services:
     image: caddy:2-alpine
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ../dist:/var/www/html        # Expo web ビルド成果物
-      - caddy_data:/data             # SSL 証明書の永続化
+      - ../dist:/var/www/html        # Expo web ビルド成果物（なくても API は動作する）
+      - caddy_data:/data
       - caddy_config:/config
-    environment:
-      - DOMAIN=${DOMAIN}
     depends_on:
       - hono-api
     restart: unless-stopped
