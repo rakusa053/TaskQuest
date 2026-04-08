@@ -1,0 +1,13 @@
+{$DOMAIN} {
+    # API リクエストは hono-api コンテナへ
+    handle /api/* {
+        reverse_proxy hono-api:3000
+    }
+
+    # それ以外は Expo Web の静的ファイルを配信
+    handle {
+        root * /var/www/html
+        file_server
+        try_files {path} /index.html
+    }
+}
