@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { View, ScrollView, StyleSheet, Platform } from 'react-native';
+import { View, ScrollView, StyleSheet, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Switch, Divider, List, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSettingsStore } from '../store/settingsStore';
 import { useTaskStore } from '../store/taskStore';
+import { useThemeStore, PRESET_THEMES } from '../store/themeStore';
 import { Button } from '../components/ui/Button';
 
 export default function SettingsScreen() {
@@ -13,10 +14,12 @@ export default function SettingsScreen() {
   const { notificationsEnabled, reminderHour, lockEnabled, load, setNotifications, setLockEnabled } =
     useSettingsStore();
   const { tasks, fetch } = useTaskStore();
+  const { activeThemeId, unlockedThemeIds, applyTheme, load: loadTheme } = useThemeStore();
 
   useEffect(() => {
     load();
     fetch();
+    loadTheme();
   }, []);
 
   const todayStart = new Date();
@@ -91,6 +94,42 @@ export default function SettingsScreen() {
         )}
 
         <List.Section>
+          <List.Subheader>テーマ</List.Subheader>
+          <View style={styles.themeGrid}>
+            {PRESET_THEMES.map((t) => {
+              const unlocked = unlockedThemeIds.includes(t.id);
+              const active = activeThemeId === t.id;
+              return (
+                <TouchableOpacity
+                  key={t.id}
+                  style={[styles.themeCard, active && styles.themeCardActive]}
+                  onPress={() => unlocked ? applyTheme(t.id) : null}
+                  activeOpacity={unlocked ? 0.7 : 1}
+                >
+                  <View style={[styles.themeIcon, { backgroundColor: t.bgColor, borderColor: t.borderColor }]}>
+                    <MaterialCommunityIcons name="palette" size={24} color={t.accentColor} />
+                  </View>
+                  <Text variant="labelSmall" style={[styles.themeName, !unlocked && styles.themeNameLocked]}>
+                    {t.name}
+                  </Text>
+                  {!unlocked && (
+                    <MaterialCommunityIcons name="lock" size={12} color="#9ca3af" style={styles.lockIcon} />
+                  )}
+                  {active && (
+                    <MaterialCommunityIcons name="check-circle" size={14} color={t.accentColor} style={styles.lockIcon} />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <Text variant="labelSmall" style={styles.themeHint}>
+            ロックされたテーマはショップで購入できます
+          </Text>
+        </List.Section>
+
+        <Divider />
+
+        <List.Section>
           <List.Subheader>アカウント</List.Subheader>
           <List.Item
             title="ニックネーム変更"
@@ -118,4 +157,15 @@ const styles = StyleSheet.create({
   todayText: { flex: 1 },
   todayCount: { color: '#1f2937', fontWeight: '700' },
   todaySub: { color: '#6b7280', marginTop: 2 },
+  themeGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, gap: 10 },
+  themeCard: {
+    width: 72, alignItems: 'center', gap: 4, padding: 8,
+    borderRadius: 12, borderWidth: 2, borderColor: 'transparent',
+  },
+  themeCardActive: { borderColor: '#6366f1', backgroundColor: '#f5f3ff' },
+  themeIcon: { width: 44, height: 44, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  themeName: { color: '#374151', textAlign: 'center' },
+  themeNameLocked: { color: '#9ca3af' },
+  lockIcon: { position: 'absolute', top: 6, right: 6 },
+  themeHint: { color: '#9ca3af', paddingHorizontal: 16, paddingTop: 6, paddingBottom: 4 },
 });
