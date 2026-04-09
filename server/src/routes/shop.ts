@@ -52,6 +52,61 @@ const SHOP_ITEMS = [
     value: 180,
     isLimited: false,
   },
+  // アバター
+  {
+    id: 'avatar_dragon',
+    type: 'avatar',
+    name: 'ドラゴン',
+    description: '伝説のドラゴンアバター 🐉',
+    price: 500,
+    isLimited: false,
+    imageUrl: '🐉',
+  },
+  {
+    id: 'avatar_fox',
+    type: 'avatar',
+    name: 'キツネ',
+    description: 'すばしこいキツネアバター 🦊',
+    price: 300,
+    isLimited: false,
+    imageUrl: '🦊',
+  },
+  {
+    id: 'avatar_panda',
+    type: 'avatar',
+    name: 'パンダ',
+    description: 'かわいいパンダアバター 🐼',
+    price: 300,
+    isLimited: false,
+    imageUrl: '🐼',
+  },
+  {
+    id: 'avatar_king',
+    type: 'avatar',
+    name: '王者',
+    description: '最強の王者アバター 👑',
+    price: 800,
+    isLimited: true,
+    imageUrl: '👑',
+  },
+  {
+    id: 'avatar_robot',
+    type: 'avatar',
+    name: 'ロボット',
+    description: 'クールなロボットアバター 🤖',
+    price: 400,
+    isLimited: false,
+    imageUrl: '🤖',
+  },
+  {
+    id: 'avatar_star',
+    type: 'avatar',
+    name: 'スター',
+    description: 'かがやくスターアバター 🌟',
+    price: 600,
+    isLimited: false,
+    imageUrl: '🌟',
+  },
   // テーマ
   {
     id: 'theme_ocean',
@@ -149,7 +204,12 @@ shop.post('/purchase/:itemId', async (c) => {
   };
 
   // 商品タイプ別の付与処理
-  if (item.type === 'gacha_ticket') {
+  if (item.type === 'avatar') {
+    const unlockedAvatars = profile.unlockedAvatars ?? [];
+    if (!unlockedAvatars.includes(item.id)) {
+      updates.unlockedAvatars = [...unlockedAvatars, item.id];
+    }
+  } else if (item.type === 'gacha_ticket') {
     updates.gachaTickets = (profile.gachaTickets ?? 0) + (item.value ?? 1);
   } else if (item.type === 'xp_boost') {
     const currentExpiry = profile.xpBoostExpiresAt ?? 0;
@@ -179,6 +239,7 @@ shop.post('/purchase/:itemId', async (c) => {
     remainingMoney: updates.money,
     ...(item.type === 'gacha_ticket' ? { gachaTickets: updates.gachaTickets } : {}),
     ...(item.type === 'xp_boost' ? { xpBoostExpiresAt: updates.xpBoostExpiresAt } : {}),
+    ...(item.type === 'avatar' ? { unlockedAvatars: updates.unlockedAvatars } : {}),
     ...(item.type === 'theme' ? { unlockedThemes: updates.unlockedThemes } : {}),
   });
 });

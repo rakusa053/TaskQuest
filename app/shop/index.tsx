@@ -52,6 +52,12 @@ export default function ShopScreen() {
               );
             });
         if (apply) applyTheme(item.id);
+      } else if (item.type === 'avatar') {
+        if (Platform.OS === 'web') {
+          window.alert(`「${item.name}」を入手しました！\nアバター選択画面から使えます。`);
+        } else {
+          Alert.alert('購入完了！', `「${item.name}」を入手しました！\nアバター選択画面から使えます。`);
+        }
       } else {
         if (Platform.OS === 'web') {
           window.alert(`購入完了！ 残高: ${result.remainingMoney}コイン`);
