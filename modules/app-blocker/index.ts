@@ -50,7 +50,7 @@ export function addBlockListener(listener: () => void): EventSubscription {
 
 /** 現在の解放期限（Unix ms）を返す。0 なら解放中ではない */
 export function getUnlockExpiry(): number {
-  return AppBlocker?.getUnlockExpiry() ?? 0;
+  return AppBlocker?.getUnlockExpiry?.() ?? 0;
 }
 
 /**
