@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { profileApi } from '../api/profileApi';
+import { useProfileStore } from './profileStore';
 
 interface AuthState {
   user: User | null;
@@ -37,7 +38,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true });
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      await profileApi.init({ displayName });
+      const profile = await profileApi.init({ displayName });
+      // 初期化完了後にプロフィールをストアに反映（タブ遷移との競合を防ぐ）
+      useProfileStore.setState({ profile });
     } finally {
       set({ loading: false });
     }
