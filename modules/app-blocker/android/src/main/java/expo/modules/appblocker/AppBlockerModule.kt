@@ -85,6 +85,16 @@ class AppBlockerModule : Module() {
     }
 
     /**
+     * ガチャ報酬の解放期限を SharedPreferences に保存する。
+     * AppBlockerService がこの値を参照してブロックをスキップする。
+     */
+    Function("setUnlockExpiry") { expiresAt: Long ->
+      Log.d("AppBlocker", "setUnlockExpiry: $expiresAt")
+      ctx.getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
+        .edit().putLong("unlock_expires_at", expiresAt).apply()
+    }
+
+    /**
      * SharedPreferences に show_lock フラグが立っているか確認。
      * 立っていれば true を返してフラグをクリアする。
      * AppState active 時に React Native から呼ぶ。

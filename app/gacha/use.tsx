@@ -7,6 +7,7 @@ import { useGacha } from '../../hooks/useGacha';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { scheduleGachaExpiry } from '../../lib/notifications';
+import { setUnlockExpiry } from 'app-blocker';
 import type { GachaResult } from '../../types';
 
 const RARITY_COLOR = { normal: '#6b7280', rare: '#6366f1', sr: '#f59e0b' };
@@ -27,6 +28,7 @@ export default function UseGachaScreen() {
           text: '使う', onPress: async () => {
             try {
               const data = await useResult(result.id, 'default');
+              setUnlockExpiry(data.expiresAt);
               await scheduleGachaExpiry(result.id, data.expiresAt, '解放アプリ');
               Alert.alert('解放開始！', `${result.rewardMinutes}分間アプリが解放されました\nタイマー終了時に通知します`);
             } catch {

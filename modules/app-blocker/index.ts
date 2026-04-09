@@ -33,6 +33,14 @@ export function stopMonitoring(): void {
 }
 
 /**
+ * ガチャ報酬の解放期限を設定する（Unix ms）。
+ * この時刻までブロック対象アプリを開いても監視サービスがスキップする。
+ */
+export function setUnlockExpiry(expiresAt: number): void {
+  AppBlocker?.setUnlockExpiry(expiresAt);
+}
+
+/**
  * SharedPreferences に "show_lock=true" が残っているか確認し、
  * 残っていれば true を返してフラグをクリアする。
  */

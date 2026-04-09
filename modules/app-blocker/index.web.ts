@@ -9,3 +9,4 @@ export function getInstalledApps(): InstalledApp[] { return []; }
 export function startMonitoring(_blockedPackages: string[]): void {}
 export function stopMonitoring(): void {}
 export function checkPendingLock(): boolean { return false; }
+export function setUnlockExpiry(_expiresAt: number): void {}

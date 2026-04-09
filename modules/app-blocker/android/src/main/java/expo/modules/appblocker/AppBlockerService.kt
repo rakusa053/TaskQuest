@@ -69,6 +69,13 @@ class AppBlockerService : Service() {
     // 自アプリは除外
     if (foreground == packageName) return
     if (foreground in blockedPackages) {
+      // 解放タイマーが有効な間はブロックしない
+      val prefs = getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
+      val unlockExpiresAt = prefs.getLong("unlock_expires_at", 0L)
+      if (System.currentTimeMillis() < unlockExpiresAt) {
+        Log.d("AppBlocker", "Unlock active until $unlockExpiresAt, skipping block")
+        return
+      }
       setPendingLock()
       bringAppToFront()
     }
