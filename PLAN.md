@@ -1,6 +1,6 @@
 # 勉強タスク管理アプリ 実装計画
 
-最終更新: 2026-04-09（**ver.5 完成** / git tag: v5.0）
+最終更新: 2026-04-09（**ver.7 完成** / git tag: v7.0）
 
 ## Context
 
@@ -364,6 +364,22 @@ useAuth / useTasks / useStats / useCalendarData / useProfile / useGacha / useBos
 - フォーカスモード UI（ロック画面）
 - 設定画面でフォーカスモード ON/OFF
 - PIN削除 → 「タスクに集中しましょう」＋「タスク画面に戻る」ボタンに変更
+
+---
+
+## ✅ ver.7 完成（2026-04-09 / git tag: v7.0）
+
+ver.7 タイトル：**アプリロック改善**
+
+ver.7 で追加・修正した機能：
+- **アプリロックタイマー実装**: ガチャ報酬使用時に `setUnlockExpiry(expiresAt)` を呼び出し、SharedPreferences に解放期限を保存。AppBlockerService がタイマーを参照し期限内はブロックをスキップ、期限切れで自動ロック再開
+- **即時ブロック修正（Android 10+対応）**: `startActivity()` がバックグラウンドから無効な問題を解消。`SYSTEM_ALERT_WINDOW`（他のアプリの上に表示）権限付与時は直接アクティビティ起動、未付与時は高優先度通知にフォールバック
+- **ブロック通知チャンネル追加**: `IMPORTANCE_HIGH` の専用チャンネルでブロック検出時に通知
+- **Expo イベントシステム導入**: サービス→JS への通知を SharedPreferences ポーリングから `EventEmitter`（`onBlockDetected`）に切り替え。ブロック検出を即座に JS へ伝達
+- **AppBlockerModule 拡張**: `canDrawOverlays()` / `openOverlaySettings()` / `setUnlockExpiry()` 関数を追加
+- **ブロックアプリ設定画面**: オーバーレイ権限未付与時に案内バナーを表示
+- **DatePickerField クラッシュ修正**: `TurboModule interop: false` 環境で `RNCDatePicker` が見つからずクラッシュする問題を動的ロードで修正。フォールバックとして YYYY/MM/DD 入力モーダルを実装
+- **Android API URL修正**: `npm run android` スクリプトのローカルIP強制上書きを削除、`.env.local` の VPS URL（`http://163.44.110.220`）を使用
 
 ---
 
