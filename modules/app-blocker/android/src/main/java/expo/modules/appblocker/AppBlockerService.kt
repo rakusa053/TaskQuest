@@ -96,7 +96,9 @@ class AppBlockerService : Service() {
   private fun getForegroundApp(): String? {
     val usm = getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return null
     val now = System.currentTimeMillis()
-    val events = usm.queryEvents(now - 2000, now)
+    // 直近10分のイベントを見て最後にフォアグラウンドに来たアプリを返す。
+    // 2秒ウィンドウだとアプリを開いたまま2秒以上経つと検出できなくなるため。
+    val events = usm.queryEvents(now - 10 * 60_000L, now)
     val event = UsageEvents.Event()
     var foreground: String? = null
     while (events.hasNextEvent()) {
