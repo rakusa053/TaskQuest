@@ -5,11 +5,12 @@ import { authMiddleware } from '../middleware/authMiddleware.js';
 const gacha = new Hono<{ Variables: { userId: string } }>();
 gacha.use('*', authMiddleware);
 
-// 確率定義
+// 確率定義（合計100）
 const GACHA_TABLE = [
-  { rarity: 'sr' as const, rewardMinutes: 30, weight: 10 },
-  { rarity: 'rare' as const, rewardMinutes: 20, weight: 30 },
-  { rarity: 'normal' as const, rewardMinutes: 10, weight: 60 },
+  { rarity: 'sr'     as const, rewardMinutes: 30, rewardMoney: 0,  weight: 10 },
+  { rarity: 'rare'   as const, rewardMinutes: 20, rewardMoney: 0,  weight: 25 },
+  { rarity: 'normal' as const, rewardMinutes: 10, rewardMoney: 0,  weight: 40 },
+  { rarity: 'miss'   as const, rewardMinutes: 0,  rewardMoney: 50, weight: 25 },
 ];
 
 function drawGacha() {
@@ -37,9 +38,30 @@ gacha.post('/spin', async (c) => {
   const result = drawGacha();
   const now = Date.now();
 
+  // チケット消費
+  await profileRef.update({ gachaTickets: (profile.gachaTickets ?? 1) - 1 });
+
+  // ハズレ: コインを即付与・Firestore には保存しない
+  if (result.rarity === 'miss') {
+    await profileRef.update({ money: (profile.money ?? 0) + result.rewardMoney });
+    return c.json({
+      id: `miss_${now}`,
+      userId,
+      rewardMinutes: 0,
+      rewardMoney: result.rewardMoney,
+      rarity: 'miss',
+      used: true,
+      usedAt: now,
+      targetApp: null,
+      expiresAt: null,
+      createdAt: now,
+    });
+  }
+
   const gachaResult = {
     userId,
     rewardMinutes: result.rewardMinutes,
+    rewardMoney: 0,
     rarity: result.rarity,
     used: false,
     usedAt: null,
@@ -49,7 +71,6 @@ gacha.post('/spin', async (c) => {
   };
 
   const ref = await db.collection('gachaResults').add(gachaResult);
-  await profileRef.update({ gachaTickets: (profile.gachaTickets ?? 1) - 1 });
 
   return c.json({ id: ref.id, ...gachaResult });
 });

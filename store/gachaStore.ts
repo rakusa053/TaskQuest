@@ -33,7 +33,9 @@ export const useGachaStore = create<GachaState>((set, get) => ({
     set({ loading: true });
     try {
       const result = await gachaApi.spin();
-      set({ lastSpinResult: result, results: [result, ...get().results] });
+      // miss は即消費済みなので results リストには追加しない
+      const newResults = result.rarity === 'miss' ? get().results : [result, ...get().results];
+      set({ lastSpinResult: result, results: newResults });
       return result;
     } finally {
       set({ loading: false });

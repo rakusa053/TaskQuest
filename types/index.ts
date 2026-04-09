@@ -73,7 +73,8 @@ export interface GachaResult {
   id: string;
   userId: string;
   rewardMinutes: number;
-  rarity: 'normal' | 'rare' | 'sr';
+  rewardMoney?: number;
+  rarity: 'normal' | 'rare' | 'sr' | 'miss';
   used: boolean;
   usedAt: number | null;
   targetApp: string | null;

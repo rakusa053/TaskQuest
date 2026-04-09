@@ -5,11 +5,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useThemeStore } from '../../store/themeStore';
 import type { GachaResult } from '../../types';
 
-const RARITY_COLOR  = { normal: '#6b7280', rare: '#6366f1', sr: '#f59e0b' };
-const RARITY_BG     = { normal: '#f3f4f6', rare: '#ede9fe', sr: '#fef9c3' };
-const RARITY_BORDER = { normal: '#d1d5db', rare: '#a78bfa', sr: '#fbbf24' };
-const RARITY_ICON   = { normal: 'clock-outline', rare: 'star', sr: 'crown' };
-const RARITY_LABEL  = { normal: 'ノーマル', rare: 'レア', sr: 'SR' };
+const RARITY_COLOR  = { normal: '#6b7280', rare: '#6366f1', sr: '#f59e0b', miss: '#9ca3af' };
+const RARITY_BG     = { normal: '#f3f4f6', rare: '#ede9fe', sr: '#fef9c3', miss: '#f9fafb' };
+const RARITY_BORDER = { normal: '#d1d5db', rare: '#a78bfa', sr: '#fbbf24', miss: '#e5e7eb' };
+const RARITY_ICON   = { normal: 'clock-outline', rare: 'star', sr: 'crown', miss: 'cash' };
+const RARITY_LABEL  = { normal: 'ノーマル', rare: 'レア', sr: 'SR', miss: 'ハズレ' };
 
 interface Props {
   result: GachaResult;
@@ -41,10 +41,21 @@ export function GachaCard({ result, revealed = false, onReveal }: Props) {
             <MaterialCommunityIcons name={icon as any} size={28} color={color} />
           </View>
           <Text style={[styles.rarity, { color }]}>{RARITY_LABEL[result.rarity]}</Text>
-          <Text variant="displaySmall" style={[styles.minutes, { color }]}>
-            {result.rewardMinutes}分
-          </Text>
-          <Text variant="bodySmall" style={styles.desc}>アプリ解放</Text>
+          {result.rarity === 'miss' ? (
+            <>
+              <Text variant="displaySmall" style={[styles.minutes, { color }]}>
+                {result.rewardMoney ?? 50}
+              </Text>
+              <Text variant="bodySmall" style={styles.desc}>コイン獲得</Text>
+            </>
+          ) : (
+            <>
+              <Text variant="displaySmall" style={[styles.minutes, { color }]}>
+                {result.rewardMinutes}分
+              </Text>
+              <Text variant="bodySmall" style={styles.desc}>アプリ解放</Text>
+            </>
+          )}
         </View>
       ) : (
         <View style={styles.back}>
