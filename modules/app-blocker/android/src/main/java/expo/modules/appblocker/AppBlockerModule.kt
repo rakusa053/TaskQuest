@@ -14,8 +14,23 @@ class AppBlockerModule : Module() {
 
   private val ctx get() = requireNotNull(appContext.reactContext)
 
+  companion object {
+    /** AppBlockerService から直接呼び出してイベントを JS に送る */
+    var emitBlockDetected: (() -> Unit)? = null
+  }
+
   override fun definition() = ModuleDefinition {
     Name("AppBlocker")
+
+    Events("onBlockDetected")
+
+    // サービスからイベントを送るためのコールバックを登録
+    OnCreate {
+      emitBlockDetected = { sendEvent("onBlockDetected", mapOf<String, Any>()) }
+    }
+    OnDestroy {
+      emitBlockDetected = null
+    }
 
     /** UsageStats 権限があるか */
     Function("hasUsagePermission") {

@@ -1,6 +1,7 @@
-import { requireOptionalNativeModule } from 'expo-modules-core';
+import { requireOptionalNativeModule, EventEmitter, type EventSubscription } from 'expo-modules-core';
 
 const AppBlocker = requireOptionalNativeModule('AppBlocker');
+const emitter = AppBlocker ? new EventEmitter(AppBlocker) : null;
 
 export type InstalledApp = {
   packageName: string;
@@ -40,6 +41,11 @@ export function startMonitoring(blockedPackages: string[]): void {
 /** 監視停止 */
 export function stopMonitoring(): void {
   AppBlocker?.stopMonitoring();
+}
+
+/** ブロック検出イベントのリスナーを登録する */
+export function addBlockListener(listener: () => void): EventSubscription {
+  return emitter?.addListener('onBlockDetected', listener) ?? { remove: () => {} };
 }
 
 /**

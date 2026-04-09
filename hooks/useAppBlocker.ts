@@ -8,6 +8,7 @@ import {
   startMonitoring,
   stopMonitoring,
   checkPendingLock,
+  addBlockListener,
 } from 'app-blocker';
 
 /**
@@ -49,7 +50,18 @@ export function useAppBlocker() {
     };
   }, [lockEnabled, blockedPackages, loaded]);
 
-  // アプリが foreground に戻るたびにロックフラグを確認（AppState + ポーリング両方で確実に拾う）
+  // ブロック検出イベント → 即座にロック画面へ（最優先）
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const blockSub = addBlockListener(() => {
+      router.push('/lock');
+    });
+
+    return () => blockSub.remove();
+  }, []);
+
+  // フォールバック: AppState + ポーリングで SharedPreferences を確認
   useEffect(() => {
     if (Platform.OS !== 'android') return;
 
@@ -58,16 +70,14 @@ export function useAppBlocker() {
       if (pending) router.push('/lock');
     };
 
-    // AppState 変化時
-    const sub = AppState.addEventListener('change', (state) => {
+    const appStateSub = AppState.addEventListener('change', (state) => {
       if (state === 'active') tryLock();
     });
 
-    // 1秒ごとのポーリング（startActivity で戻ってきたとき AppState が遅延する場合の保険）
     const interval = setInterval(tryLock, 1000);
 
     return () => {
-      sub.remove();
+      appStateSub.remove();
       clearInterval(interval);
     };
   }, []);

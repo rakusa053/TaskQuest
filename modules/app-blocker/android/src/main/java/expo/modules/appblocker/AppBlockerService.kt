@@ -109,12 +109,16 @@ class AppBlockerService : Service() {
   }
 
   /**
-   * SharedPreferences に show_lock フラグを立てる。
-   * アプリが foreground に戻ったとき React Native 側が checkPendingLock() で読み取る。
+   * ロックフラグを立て、JS側に直接イベントを送る。
+   * startActivity の前に呼ぶことで、アプリが前面に来た時点でロック画面が表示される。
    */
   private fun setPendingLock() {
+    // SharedPreferences（フォールバック用）
     getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
       .edit().putBoolean("show_lock", true).apply()
+    // Expo イベントで JS に直接通知（より確実）
+    AppBlockerModule.emitBlockDetected?.invoke()
+    Log.d("AppBlocker", "setPendingLock: event emitted, emitBlockDetected=${AppBlockerModule.emitBlockDetected != null}")
   }
 
   /**

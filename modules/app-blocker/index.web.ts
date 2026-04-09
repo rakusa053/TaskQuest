@@ -12,3 +12,6 @@ export function checkPendingLock(): boolean { return false; }
 export function setUnlockExpiry(_expiresAt: number): void {}
 export function canDrawOverlays(): boolean { return false; }
 export function openOverlaySettings(): void {}
+export function addBlockListener(_listener: () => void): { remove: () => void } {
+  return { remove: () => {} };
+}
