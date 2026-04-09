@@ -79,7 +79,7 @@ class AppBlockerService : Service() {
       val unlockExpiresAt = prefs.getLong("unlock_expires_at", 0L)
       if (System.currentTimeMillis() < unlockExpiresAt) {
         Log.d("AppBlocker", "Unlock active until $unlockExpiresAt, skipping block")
-        lastBlockedPackage = null
+        lastBlockedPackage = null  // 解放中はリセット → 期限切れ直後に即ブロック再発動
         return
       }
       // 同じアプリを連続で検出した場合は通知を重複して出さない
