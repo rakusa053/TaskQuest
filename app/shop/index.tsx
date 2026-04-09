@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, FlatList, StyleSheet, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -18,39 +18,56 @@ export default function ShopScreen() {
   const { unlockTheme, applyTheme } = useThemeStore();
   const [buyingId, setBuyingId] = useState<string | null>(null);
 
-  const handleBuy = (item: ShopItem) => {
-    Alert.alert(
-      '購入確認',
-      `「${item.name}」を${item.price}コインで購入しますか？`,
-      [
-        { text: 'キャンセル', style: 'cancel' },
-        {
-          text: '購入', onPress: async () => {
-            setBuyingId(item.id);
-            try {
-              const result = await buy(item.id);
-              if (item.type === 'theme') {
-                await unlockTheme(item.id);
-                Alert.alert(
-                  '購入完了！',
-                  `「${item.name}」を入手しました！\n適用しますか？`,
-                  [
-                    { text: '後で', style: 'cancel' },
-                    { text: '適用する', onPress: () => applyTheme(item.id) },
-                  ]
-                );
-              } else {
-                Alert.alert('購入完了！', `残高: ${result.remainingMoney}コイン`);
-              }
-            } catch {
-              Alert.alert('エラー', 'コインが足りないか、購入に失敗しました');
-            } finally {
-              setBuyingId(null);
-            }
-          }
-        },
-      ]
-    );
+  const handleBuy = async (item: ShopItem) => {
+    const confirmed = Platform.OS === 'web'
+      ? window.confirm(`「${item.name}」を${item.price}コインで購入しますか？`)
+      : await new Promise<boolean>((resolve) => {
+          Alert.alert(
+            '購入確認',
+            `「${item.name}」を${item.price}コインで購入しますか？`,
+            [
+              { text: 'キャンセル', style: 'cancel', onPress: () => resolve(false) },
+              { text: '購入', onPress: () => resolve(true) },
+            ]
+          );
+        });
+
+    if (!confirmed) return;
+
+    setBuyingId(item.id);
+    try {
+      const result = await buy(item.id);
+      if (item.type === 'theme') {
+        await unlockTheme(item.id);
+        const apply = Platform.OS === 'web'
+          ? window.confirm(`「${item.name}」を入手しました！\n今すぐ適用しますか？`)
+          : await new Promise<boolean>((resolve) => {
+              Alert.alert(
+                '購入完了！',
+                `「${item.name}」を入手しました！\n適用しますか？`,
+                [
+                  { text: '後で', style: 'cancel', onPress: () => resolve(false) },
+                  { text: '適用する', onPress: () => resolve(true) },
+                ]
+              );
+            });
+        if (apply) applyTheme(item.id);
+      } else {
+        if (Platform.OS === 'web') {
+          window.alert(`購入完了！ 残高: ${result.remainingMoney}コイン`);
+        } else {
+          Alert.alert('購入完了！', `残高: ${result.remainingMoney}コイン`);
+        }
+      }
+    } catch {
+      if (Platform.OS === 'web') {
+        window.alert('エラー: コインが足りないか、購入に失敗しました');
+      } else {
+        Alert.alert('エラー', 'コインが足りないか、購入に失敗しました');
+      }
+    } finally {
+      setBuyingId(null);
+    }
   };
 
   return (
