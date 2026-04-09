@@ -148,6 +148,11 @@ export default function BossScreen() {
                     onPress={() => router.push('/party/manage')}
                     mode="outlined"
                   />
+                  <Button
+                    label="再読み込み"
+                    onPress={refetchParty}
+                    mode="text"
+                  />
                 </View>
               </Surface>
             )}

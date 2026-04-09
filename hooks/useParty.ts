@@ -13,9 +13,16 @@ export function useParty() {
       const p = await partyApi.get();
       setParty(p);
       if (p) {
-        const b = await partyApi.boss();
-        setPartyBoss(b);
+        try {
+          const b = await partyApi.boss();
+          setPartyBoss(b);
+        } catch {
+          // ボスなし or エラーは無視
+        }
       }
+    } catch (e) {
+      console.warn('[useParty] fetch failed:', e);
+      // エラー時は state をリセットしない
     } finally {
       setLoading(false);
     }

@@ -91,12 +91,11 @@ party.post('/join', async (c) => {
     return c.json({ error: 'Party is full' }, 400);
   }
 
-  await partyDoc.ref.update({
-    memberIds: [...(partyData.memberIds ?? []), userId],
-  });
+  const newMemberIds = [...(partyData.memberIds ?? []), userId];
+  await partyDoc.ref.update({ memberIds: newMemberIds });
   await db.collection('profiles').doc(userId).set({ partyId: partyDoc.id }, { merge: true });
 
-  return c.json({ id: partyDoc.id, ...partyData });
+  return c.json({ id: partyDoc.id, ...partyData, memberIds: newMemberIds });
 });
 
 // パーティ脱退
