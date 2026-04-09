@@ -97,6 +97,11 @@ export default function ProfileScreen() {
             style={styles.halfBtn}
           />
         </View>
+        <Button
+          label="🎫 報酬を使う（アプリ解放）"
+          onPress={() => router.push('/gacha/use')}
+          mode="outlined"
+        />
 
         {/* バッジ */}
         {badges.length > 0 && (
