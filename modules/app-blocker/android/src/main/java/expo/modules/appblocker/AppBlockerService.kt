@@ -15,10 +15,13 @@ class AppBlockerService : Service() {
 
   private val handler = Handler(Looper.getMainLooper())
   private var blockedPackages: List<String> = emptyList()
+  private var lastBlockedPackage: String? = null
 
   companion object {
     const val NOTIFICATION_ID = 7777
+    const val ALERT_NOTIFICATION_ID = 7778
     const val CHANNEL_ID = "gamingtask_blocker"
+    const val ALERT_CHANNEL_ID = "gamingtask_blocker_alert"
   }
 
   override fun onBind(intent: Intent?): IBinder? = null
@@ -27,18 +30,16 @@ class AppBlockerService : Service() {
     Log.d("AppBlocker", "onStartCommand SDK=${Build.VERSION.SDK_INT} packages=$blockedPackages")
     blockedPackages = intent?.getStringArrayListExtra("blockedPackages") ?: emptyList()
     Log.d("AppBlocker", "onStartCommand updated packages=$blockedPackages")
-    createNotificationChannel()
+    createNotificationChannels()
     try {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-        Log.d("AppBlocker", "startForeground: using 3-arg (API34+)")
         startForeground(
           NOTIFICATION_ID,
-          buildNotification(),
+          buildForegroundNotification(),
           android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
         )
       } else {
-        Log.d("AppBlocker", "startForeground: using 2-arg")
-        startForeground(NOTIFICATION_ID, buildNotification())
+        startForeground(NOTIFICATION_ID, buildForegroundNotification())
       }
       Log.d("AppBlocker", "startForeground success")
     } catch (e: Exception) {
@@ -67,24 +68,33 @@ class AppBlockerService : Service() {
   private fun checkForeground() {
     val foreground = getForegroundApp() ?: return
     // 自アプリは除外
-    if (foreground == packageName) return
+    if (foreground == packageName) {
+      lastBlockedPackage = null
+      return
+    }
     if (foreground in blockedPackages) {
       // 解放タイマーが有効な間はブロックしない
       val prefs = getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
       val unlockExpiresAt = prefs.getLong("unlock_expires_at", 0L)
       if (System.currentTimeMillis() < unlockExpiresAt) {
         Log.d("AppBlocker", "Unlock active until $unlockExpiresAt, skipping block")
+        lastBlockedPackage = null
         return
       }
+      // 同じアプリを連続で検出した場合は通知を重複して出さない
+      if (foreground == lastBlockedPackage) return
+      lastBlockedPackage = foreground
+      Log.d("AppBlocker", "Blocking $foreground -> showing alert notification")
       setPendingLock()
-      bringAppToFront()
+      showBlockAlert()
+    } else {
+      lastBlockedPackage = null
     }
   }
 
   private fun getForegroundApp(): String? {
     val usm = getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return null
     val now = System.currentTimeMillis()
-    // UsageEvents.MOVE_TO_FOREGROUND で確実にフォアグラウンドアプリを検出
     val events = usm.queryEvents(now - 2000, now)
     val event = UsageEvents.Event()
     var foreground: String? = null
@@ -94,7 +104,6 @@ class AppBlockerService : Service() {
         foreground = event.packageName
       }
     }
-    Log.d("AppBlocker", "foreground=$foreground blocked=$blockedPackages")
     return foreground
   }
 
@@ -107,25 +116,60 @@ class AppBlockerService : Service() {
       .edit().putBoolean("show_lock", true).apply()
   }
 
-  /** 自アプリをフォアグラウンドに持ってくる */
-  private fun bringAppToFront() {
-    val intent = packageManager.getLaunchIntentForPackage(packageName) ?: return
-    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-      Intent.FLAG_ACTIVITY_SINGLE_TOP or
-      Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    startActivity(intent)
+  /**
+   * Android 10+ では startActivity がバックグラウンドから動作しないため、
+   * 高優先度の通知でユーザーをアプリに誘導する。
+   */
+  private fun showBlockAlert() {
+    val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+    } ?: return
+
+    val pi = PendingIntent.getActivity(
+      this, ALERT_NOTIFICATION_ID, launchIntent,
+      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      Notification.Builder(this, ALERT_CHANNEL_ID)
+        .setContentTitle("🔒 フォーカスモード")
+        .setContentText("このアプリはブロックされています。タップして戻る")
+        .setSmallIcon(android.R.drawable.ic_lock_lock)
+        .setContentIntent(pi)
+        .setAutoCancel(true)
+        .setOnlyAlertOnce(false)
+        .build()
+    } else {
+      @Suppress("DEPRECATION")
+      Notification.Builder(this)
+        .setContentTitle("🔒 フォーカスモード")
+        .setContentText("このアプリはブロックされています。タップして戻る")
+        .setSmallIcon(android.R.drawable.ic_lock_lock)
+        .setContentIntent(pi)
+        .setAutoCancel(true)
+        .build()
+    }
+    nm.notify(ALERT_NOTIFICATION_ID, notification)
   }
 
-  private fun createNotificationChannel() {
+  private fun createNotificationChannels() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      val channel = NotificationChannel(
-        CHANNEL_ID, "フォーカスモード", NotificationManager.IMPORTANCE_LOW
-      ).apply { setShowBadge(false) }
-      getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+      val nm = getSystemService(NotificationManager::class.java)
+      // 常駐通知（低優先度）
+      nm.createNotificationChannel(
+        NotificationChannel(CHANNEL_ID, "フォーカスモード", NotificationManager.IMPORTANCE_LOW)
+          .apply { setShowBadge(false) }
+      )
+      // ブロック通知（高優先度）
+      nm.createNotificationChannel(
+        NotificationChannel(ALERT_CHANNEL_ID, "ブロック通知", NotificationManager.IMPORTANCE_HIGH)
+          .apply { setShowBadge(true) }
+      )
     }
   }
 
-  private fun buildNotification(): Notification {
+  private fun buildForegroundNotification(): Notification {
     val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
     val pi = PendingIntent.getActivity(
       this, 0, launchIntent,
@@ -152,4 +196,3 @@ class AppBlockerService : Service() {
   }
 
 }
-
