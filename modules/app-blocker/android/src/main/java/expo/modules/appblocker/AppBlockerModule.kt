@@ -23,20 +23,23 @@ class AppBlockerModule : Module() {
 
   private fun drawableToBitmap(drawable: Drawable): Bitmap {
     if (drawable is BitmapDrawable && drawable.bitmap != null) return drawable.bitmap
-    val size = 48
+    val size = 96
+    // AdaptiveIconDrawable (Android 8+): 108px で描画し中央の 72px (safe zone) を切り抜く
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && drawable is AdaptiveIconDrawable) {
+      val fullSize = 108
+      val safeZone = 72
+      val full = Bitmap.createBitmap(fullSize, fullSize, Bitmap.Config.ARGB_8888)
+      val canvas = Canvas(full)
+      drawable.setBounds(0, 0, fullSize, fullSize)
+      drawable.draw(canvas)
+      val offset = (fullSize - safeZone) / 2
+      val cropped = Bitmap.createBitmap(full, offset, offset, safeZone, safeZone)
+      return Bitmap.createScaledBitmap(cropped, size, size, true)
+    }
     val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
-    // AdaptiveIconDrawable (Android 8+) は背景と前景を別々に描画する必要がある
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && drawable is AdaptiveIconDrawable) {
-      // アダプティブアイコンは -1/4 オフセットで全体の 1.5 倍の領域に描画される仕様
-      val dr = (size / 4f).toInt()
-      drawable.setBounds(-dr, -dr, size + dr, size + dr)
-      drawable.background?.draw(canvas)
-      drawable.foreground?.draw(canvas)
-    } else {
-      drawable.setBounds(0, 0, size, size)
-      drawable.draw(canvas)
-    }
+    drawable.setBounds(0, 0, size, size)
+    drawable.draw(canvas)
     return bitmap
   }
 
