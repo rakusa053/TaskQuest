@@ -3,16 +3,32 @@ package expo.modules.appblocker
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
+import android.util.Base64
 import android.util.Log
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import java.io.ByteArrayOutputStream
 
 class AppBlockerModule : Module() {
 
   private val ctx get() = requireNotNull(appContext.reactContext)
+
+  private fun drawableToBitmap(drawable: Drawable): Bitmap {
+    if (drawable is BitmapDrawable && drawable.bitmap != null) return drawable.bitmap
+    val size = 48
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    drawable.setBounds(0, 0, size, size)
+    drawable.draw(canvas)
+    return bitmap
+  }
 
   companion object {
     /** AppBlockerService から直接呼び出してイベントを JS に送る */
@@ -77,7 +93,21 @@ class AppBlockerModule : Module() {
       }
       pm.queryIntentActivities(launchIntent, 0)
         .filter { it.activityInfo.packageName != ctx.packageName }
-        .map { mapOf("packageName" to it.activityInfo.packageName, "appName" to it.loadLabel(pm).toString()) }
+        .map {
+          val icon = try {
+            val drawable = it.loadIcon(pm)
+            val bitmap = drawableToBitmap(drawable)
+            val scaled = Bitmap.createScaledBitmap(bitmap, 48, 48, true)
+            val stream = ByteArrayOutputStream()
+            scaled.compress(Bitmap.CompressFormat.PNG, 80, stream)
+            "data:image/png;base64," + Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
+          } catch (e: Exception) { null }
+          mapOf(
+            "packageName" to it.activityInfo.packageName,
+            "appName" to it.loadLabel(pm).toString(),
+            "icon" to icon,
+          )
+        }
         .sortedBy { it["appName"] as String }
     }
 

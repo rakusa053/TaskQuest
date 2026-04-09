@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, Platform } from 'react-native';
+import { View, FlatList, StyleSheet, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Switch, ActivityIndicator } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -128,12 +128,18 @@ export default function BlockedAppsScreen() {
           keyExtractor={(item) => item.packageName}
           renderItem={({ item }) => (
             <View style={styles.row}>
-              <Text variant="bodyMedium" style={styles.appName} numberOfLines={1}>
-                {item.appName}
-              </Text>
-              <Text variant="labelSmall" style={styles.pkg} numberOfLines={1}>
-                {item.packageName}
-              </Text>
+              {item.icon
+                ? <Image source={{ uri: item.icon }} style={styles.appIcon} />
+                : <View style={styles.appIconPlaceholder} />
+              }
+              <View style={styles.appInfo}>
+                <Text variant="bodyMedium" style={styles.appName} numberOfLines={1}>
+                  {item.appName}
+                </Text>
+                <Text variant="labelSmall" style={styles.pkg} numberOfLines={1}>
+                  {item.packageName}
+                </Text>
+              </View>
               <Switch
                 value={blockedPackages.includes(item.packageName)}
                 onValueChange={() => handleToggle(item.packageName)}
@@ -165,8 +171,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 12,
     backgroundColor: '#fff', gap: 8,
   },
-  appName: { flex: 1, color: '#1f2937', fontWeight: '500' },
-  pkg: { color: '#9ca3af', maxWidth: 160 },
+  appIcon: { width: 40, height: 40, borderRadius: 10 },
+  appIconPlaceholder: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#e5e7eb' },
+  appInfo: { flex: 1, gap: 2 },
+  appName: { color: '#1f2937', fontWeight: '500' },
+  pkg: { color: '#9ca3af' },
   separator: { height: 1, backgroundColor: '#f3f4f6' },
   overlayBanner: {
     backgroundColor: '#fef9c3', padding: 12, margin: 8, borderRadius: 10, gap: 4,

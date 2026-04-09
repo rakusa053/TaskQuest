@@ -6,6 +6,7 @@ const emitter = AppBlocker ? new EventEmitter(AppBlocker) : null;
 export type InstalledApp = {
   packageName: string;
   appName: string;
+  icon?: string; // data:image/png;base64,...
 };
 
 /** UsageStats 権限が付与されているか確認 */
