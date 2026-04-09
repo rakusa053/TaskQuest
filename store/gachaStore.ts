@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { gachaApi } from '../api/gachaApi';
+import { useProfileStore } from './profileStore';
 import type { GachaResult } from '../types';
 
 interface GachaState {
@@ -31,11 +32,19 @@ export const useGachaStore = create<GachaState>((set, get) => ({
 
   spin: async () => {
     set({ loading: true });
+    // 楽観的にチケット数を即時デクリメント
+    const profileState = useProfileStore.getState();
+    if (profileState.profile) {
+      profileState.profile.gachaTickets -= 1;
+      useProfileStore.setState({ profile: { ...profileState.profile } });
+    }
     try {
       const result = await gachaApi.spin();
       // miss は即消費済みなので results リストには追加しない
       const newResults = result.rarity === 'miss' ? get().results : [result, ...get().results];
       set({ lastSpinResult: result, results: newResults });
+      // サーバー側の最新値でプロフィールを同期
+      useProfileStore.getState().fetch();
       return result;
     } finally {
       set({ loading: false });
