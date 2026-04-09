@@ -5,6 +5,7 @@ import { Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useShop } from '../../hooks/useShop';
 import { useProfileStore } from '../../store/profileStore';
+import { useThemeStore } from '../../store/themeStore';
 import { ShopItemCard } from '../../components/shop/ShopItemCard';
 import { CoinDisplay } from '../../components/gamification/CoinDisplay';
 import { Button } from '../../components/ui/Button';
@@ -14,6 +15,7 @@ export default function ShopScreen() {
   const router = useRouter();
   const { items, purchasing, buy } = useShop();
   const { profile } = useProfileStore();
+  const { unlockTheme, applyTheme } = useThemeStore();
   const [buyingId, setBuyingId] = useState<string | null>(null);
 
   const handleBuy = (item: ShopItem) => {
@@ -27,7 +29,19 @@ export default function ShopScreen() {
             setBuyingId(item.id);
             try {
               const result = await buy(item.id);
-              Alert.alert('購入完了！', `残高: ${result.remainingMoney}コイン`);
+              if (item.type === 'theme') {
+                await unlockTheme(item.id);
+                Alert.alert(
+                  '購入完了！',
+                  `「${item.name}」を入手しました！\n適用しますか？`,
+                  [
+                    { text: '後で', style: 'cancel' },
+                    { text: '適用する', onPress: () => applyTheme(item.id) },
+                  ]
+                );
+              } else {
+                Alert.alert('購入完了！', `残高: ${result.remainingMoney}コイン`);
+              }
             } catch {
               Alert.alert('エラー', 'コインが足りないか、購入に失敗しました');
             } finally {

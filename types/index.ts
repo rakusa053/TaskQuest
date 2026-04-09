@@ -84,13 +84,25 @@ export interface GachaResult {
 // ===== ショップ =====
 export interface ShopItem {
   id: string;
-  type: 'avatar' | 'costume' | 'accessory' | 'gacha_ticket' | 'time_extension' | 'xp_boost';
+  type: 'avatar' | 'costume' | 'accessory' | 'gacha_ticket' | 'time_extension' | 'xp_boost' | 'theme';
   name: string;
   description: string;
   imageUrl?: string;
   price: number;
   value?: number;
   isLimited: boolean;
+  // テーマ用カラー
+  themeAccentColor?: string;
+  themeBgColor?: string;
+  themeBorderColor?: string;
+}
+
+export interface AppTheme {
+  id: string;
+  name: string;
+  accentColor: string;
+  bgColor: string;
+  borderColor: string;
 }
 
 export interface PurchaseLog {

@@ -52,6 +52,62 @@ const SHOP_ITEMS = [
     value: 180,
     isLimited: false,
   },
+  // テーマ
+  {
+    id: 'theme_ocean',
+    type: 'theme',
+    name: 'オーシャンテーマ',
+    description: 'アイコンと枠をブルーに変更',
+    price: 300,
+    isLimited: false,
+    themeAccentColor: '#2563eb',
+    themeBgColor: '#dbeafe',
+    themeBorderColor: '#60a5fa',
+  },
+  {
+    id: 'theme_forest',
+    type: 'theme',
+    name: 'フォレストテーマ',
+    description: 'アイコンと枠をグリーンに変更',
+    price: 300,
+    isLimited: false,
+    themeAccentColor: '#16a34a',
+    themeBgColor: '#dcfce7',
+    themeBorderColor: '#4ade80',
+  },
+  {
+    id: 'theme_sunset',
+    type: 'theme',
+    name: 'サンセットテーマ',
+    description: 'アイコンと枠をオレンジに変更',
+    price: 300,
+    isLimited: false,
+    themeAccentColor: '#ea580c',
+    themeBgColor: '#ffedd5',
+    themeBorderColor: '#fb923c',
+  },
+  {
+    id: 'theme_cherry',
+    type: 'theme',
+    name: 'チェリーテーマ',
+    description: 'アイコンと枠をピンクに変更',
+    price: 300,
+    isLimited: false,
+    themeAccentColor: '#db2777',
+    themeBgColor: '#fce7f3',
+    themeBorderColor: '#f472b6',
+  },
+  {
+    id: 'theme_gold',
+    type: 'theme',
+    name: 'ゴールドテーマ',
+    description: 'アイコンと枠をゴールドに変更',
+    price: 500,
+    isLimited: true,
+    themeAccentColor: '#ca8a04',
+    themeBgColor: '#fef9c3',
+    themeBorderColor: '#facc15',
+  },
 ];
 
 // 商品一覧取得
@@ -99,6 +155,11 @@ shop.post('/purchase/:itemId', async (c) => {
     const currentExpiry = profile.xpBoostExpiresAt ?? 0;
     const baseTime = Math.max(now, currentExpiry);
     updates.xpBoostExpiresAt = baseTime + (item.value ?? 60) * 60 * 1000;
+  } else if (item.type === 'theme') {
+    const unlockedThemes = profile.unlockedThemes ?? [];
+    if (!unlockedThemes.includes(item.id)) {
+      updates.unlockedThemes = [...unlockedThemes, item.id];
+    }
   }
 
   await profileRef.update(updates);
@@ -118,6 +179,7 @@ shop.post('/purchase/:itemId', async (c) => {
     remainingMoney: updates.money,
     ...(item.type === 'gacha_ticket' ? { gachaTickets: updates.gachaTickets } : {}),
     ...(item.type === 'xp_boost' ? { xpBoostExpiresAt: updates.xpBoostExpiresAt } : {}),
+    ...(item.type === 'theme' ? { unlockedThemes: updates.unlockedThemes } : {}),
   });
 });
 

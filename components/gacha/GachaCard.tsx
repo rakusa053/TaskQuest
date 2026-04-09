@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useThemeStore } from '../../store/themeStore';
 import type { GachaResult } from '../../types';
 
 const RARITY_COLOR  = { normal: '#6b7280', rare: '#6366f1', sr: '#f59e0b' };
@@ -18,9 +19,11 @@ interface Props {
 
 export function GachaCard({ result, revealed = false, onReveal }: Props) {
   const [flipped, setFlipped] = useState(revealed);
-  const color  = RARITY_COLOR[result.rarity];
-  const bg     = RARITY_BG[result.rarity];
-  const border = RARITY_BORDER[result.rarity];
+  const { theme } = useThemeStore();
+  // SR のみレアリティ固有色、それ以外はテーマカラーを使用
+  const color  = result.rarity === 'sr' ? RARITY_COLOR.sr  : result.rarity === 'rare' ? theme.accentColor : RARITY_COLOR.normal;
+  const bg     = result.rarity === 'sr' ? RARITY_BG.sr     : result.rarity === 'rare' ? theme.bgColor     : RARITY_BG.normal;
+  const border = result.rarity === 'sr' ? RARITY_BORDER.sr : result.rarity === 'rare' ? theme.borderColor : RARITY_BORDER.normal;
   const icon   = RARITY_ICON[result.rarity];
 
   const handlePress = () => {
