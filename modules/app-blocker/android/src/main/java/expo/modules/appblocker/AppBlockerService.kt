@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 
 class AppBlockerService : Service() {
@@ -117,10 +118,28 @@ class AppBlockerService : Service() {
   }
 
   /**
-   * Android 10+ では startActivity がバックグラウンドから動作しないため、
-   * 高優先度の通知でユーザーをアプリに誘導する。
+   * ブロックアプリ検出時の対応。
+   * - SYSTEM_ALERT_WINDOW 権限あり → 直接 Activity 起動（Android 10+ でも可）
+   * - 権限なし → 高優先度通知でユーザーを誘導
    */
   private fun showBlockAlert() {
+    if (Settings.canDrawOverlays(this)) {
+      val intent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+          Intent.FLAG_ACTIVITY_SINGLE_TOP or
+          Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+      }
+      if (intent != null) {
+        Log.d("AppBlocker", "canDrawOverlays=true, launching activity directly")
+        startActivity(intent)
+        return
+      }
+    }
+    Log.d("AppBlocker", "canDrawOverlays=false, showing notification")
+    showNotificationAlert()
+  }
+
+  private fun showNotificationAlert() {
     val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
       flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
     } ?: return

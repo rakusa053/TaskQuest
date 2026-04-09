@@ -17,6 +17,16 @@ export function openUsageSettings(): void {
   AppBlocker?.openUsageSettings();
 }
 
+/** 「他のアプリの上に表示」権限があるか（Android 10+ のバックグラウンド起動に必要） */
+export function canDrawOverlays(): boolean {
+  return AppBlocker?.canDrawOverlays() ?? false;
+}
+
+/** 「他のアプリの上に表示」設定画面を開く */
+export function openOverlaySettings(): void {
+  AppBlocker?.openOverlaySettings();
+}
+
 /** インストール済みの起動可能アプリ一覧を取得 */
 export function getInstalledApps(): InstalledApp[] {
   return AppBlocker?.getInstalledApps() ?? [];

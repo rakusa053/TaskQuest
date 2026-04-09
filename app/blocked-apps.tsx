@@ -12,6 +12,8 @@ import {
   getInstalledApps,
   startMonitoring,
   stopMonitoring,
+  canDrawOverlays,
+  openOverlaySettings,
   type InstalledApp,
 } from 'app-blocker';
 
@@ -22,12 +24,14 @@ export default function BlockedAppsScreen() {
   const [apps, setApps] = useState<InstalledApp[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
+  const [hasOverlay, setHasOverlay] = useState(false);
 
   useEffect(() => {
     load();
     if (Platform.OS === 'android') {
       const perm = hasUsagePermission();
       setHasPermission(perm);
+      setHasOverlay(canDrawOverlays());
       if (perm) {
         setApps(getInstalledApps());
       }
@@ -93,11 +97,32 @@ export default function BlockedAppsScreen() {
             onPress={() => {
               const perm = hasUsagePermission();
               setHasPermission(perm);
+              setHasOverlay(canDrawOverlays());
               if (perm) setApps(getInstalledApps());
             }}
           />
         </View>
       ) : (
+        <>
+          {!hasOverlay && (
+            <View style={styles.overlayBanner}>
+              <Text variant="labelMedium" style={styles.overlayText}>
+                ⚡ 即時ブロックには「他のアプリの上に表示」権限が必要です
+              </Text>
+              <Button
+                label="権限を付与 →"
+                mode="text"
+                onPress={() => {
+                  openOverlaySettings();
+                }}
+              />
+              <Button
+                label="リロード"
+                mode="text"
+                onPress={() => setHasOverlay(canDrawOverlays())}
+              />
+            </View>
+          )}
         <FlatList
           data={apps}
           keyExtractor={(item) => item.packageName}
@@ -118,6 +143,7 @@ export default function BlockedAppsScreen() {
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
+        </>
       )}
     </SafeAreaView>
   );
@@ -142,4 +168,8 @@ const styles = StyleSheet.create({
   appName: { flex: 1, color: '#1f2937', fontWeight: '500' },
   pkg: { color: '#9ca3af', maxWidth: 160 },
   separator: { height: 1, backgroundColor: '#f3f4f6' },
+  overlayBanner: {
+    backgroundColor: '#fef9c3', padding: 12, margin: 8, borderRadius: 10, gap: 4,
+  },
+  overlayText: { color: '#92400e' },
 });

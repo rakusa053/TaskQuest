@@ -22,6 +22,19 @@ class AppBlockerModule : Module() {
       hasUsagePermission()
     }
 
+    /** 「他のアプリの上に表示」権限があるか（Android 10+ のバックグラウンド起動に必要） */
+    Function("canDrawOverlays") {
+      Settings.canDrawOverlays(ctx)
+    }
+
+    /** 「他のアプリの上に表示」設定画面を開く */
+    Function("openOverlaySettings") {
+      ctx.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+        data = android.net.Uri.parse("package:${ctx.packageName}")
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+      })
+    }
+
     /** 使用状況アクセス設定画面を開く（Android 10+ はアプリ個別ページに直接遷移） */
     Function("openUsageSettings") {
       val fallbackIntent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
