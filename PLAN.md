@@ -1,6 +1,6 @@
 # 勉強タスク管理アプリ 実装計画
 
-最終更新: 2026-04-06（**ver.2 完成** / git tag: v2.0）
+最終更新: 2026-04-09（**ver.5 完成** / git tag: v5.0）
 
 ## Context
 
@@ -364,6 +364,18 @@ useAuth / useTasks / useStats / useCalendarData / useProfile / useGacha / useBos
 - フォーカスモード UI（ロック画面）
 - 設定画面でフォーカスモード ON/OFF
 - PIN削除 → 「タスクに集中しましょう」＋「タスク画面に戻る」ボタンに変更
+
+---
+
+## ✅ ver.5 完成（2026-04-09 / git tag: v5.0）
+
+ver.5 で追加した機能：
+- **ConoHa VPS 本番デプロイ**: `http://163.44.110.220/` で稼働
+- Docker Compose（Caddy + hono-api）で API サーバーを本番運用
+- Firebase Auth の Web 永続化バグ修正（`browserLocalPersistence` を正しく適用）
+- 起動前 Auth 初期化待ち（`initialized` が true になるまでローディング表示）
+- TypeScript → CommonJS ビルドに変更（firebase-admin ESM 互換問題修正）
+- Expo web ビルドを VPS に配信（Caddy で静的ファイル配信）
 
 ---
 
