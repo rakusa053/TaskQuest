@@ -73,11 +73,33 @@ sns.get('/feed', async (c) => {
     likedPostIds = new Set(likeResults.flatMap(r => r.docs.map(d => d.data().postId)));
   }
 
-  const posts = postDocs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-    likedByMe: likedPostIds.has(doc.id),
-  }));
+  // 投稿者の現在のdisplayName/avatarIdを取得（スナップショットが古い場合に対応）
+  const uniqueUserIds = [...new Set(postDocs.map(d => d.data().userId as string))];
+  const profileMap = new Map<string, { displayName: string; avatarId: string }>();
+  if (uniqueUserIds.length > 0) {
+    const profileRefs = uniqueUserIds.map(uid => db.collection('profiles').doc(uid));
+    const profileDocs = await db.getAll(...profileRefs);
+    profileDocs.forEach(doc => {
+      if (doc.exists) {
+        const data = doc.data()!;
+        profileMap.set(doc.id, {
+          displayName: data.displayName ?? 'プレイヤー',
+          avatarId: data.avatarId ?? 'default',
+        });
+      }
+    });
+  }
+
+  const posts = postDocs.map(doc => {
+    const profile = profileMap.get(doc.data().userId);
+    return {
+      id: doc.id,
+      ...doc.data(),
+      displayName: profile?.displayName ?? doc.data().displayName ?? 'プレイヤー',
+      avatarId: profile?.avatarId ?? doc.data().avatarId ?? 'default',
+      likedByMe: likedPostIds.has(doc.id),
+    };
+  });
 
   return c.json(posts);
 });
