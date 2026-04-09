@@ -49,19 +49,26 @@ export function useAppBlocker() {
     };
   }, [lockEnabled, blockedPackages, loaded]);
 
-  // アプリが foreground に戻るたびにロックフラグを確認
+  // アプリが foreground に戻るたびにロックフラグを確認（AppState + ポーリング両方で確実に拾う）
   useEffect(() => {
     if (Platform.OS !== 'android') return;
 
+    const tryLock = () => {
+      const pending = checkPendingLock();
+      if (pending) router.push('/lock');
+    };
+
+    // AppState 変化時
     const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') {
-        const pending = checkPendingLock();
-        if (pending) {
-          router.push('/lock');
-        }
-      }
+      if (state === 'active') tryLock();
     });
 
-    return () => sub.remove();
+    // 1秒ごとのポーリング（startActivity で戻ってきたとき AppState が遅延する場合の保険）
+    const interval = setInterval(tryLock, 1000);
+
+    return () => {
+      sub.remove();
+      clearInterval(interval);
+    };
   }, []);
 }
