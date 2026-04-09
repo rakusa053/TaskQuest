@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -25,8 +26,17 @@ class AppBlockerModule : Module() {
     val size = 48
     val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
-    drawable.setBounds(0, 0, size, size)
-    drawable.draw(canvas)
+    // AdaptiveIconDrawable (Android 8+) は背景と前景を別々に描画する必要がある
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && drawable is AdaptiveIconDrawable) {
+      // アダプティブアイコンは -1/4 オフセットで全体の 1.5 倍の領域に描画される仕様
+      val dr = (size / 4f).toInt()
+      drawable.setBounds(-dr, -dr, size + dr, size + dr)
+      drawable.background?.draw(canvas)
+      drawable.foreground?.draw(canvas)
+    } else {
+      drawable.setBounds(0, 0, size, size)
+      drawable.draw(canvas)
+    }
     return bitmap
   }
 
