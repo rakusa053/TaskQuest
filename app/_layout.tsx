@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { PaperProvider } from 'react-native-paper';
+import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAuth } from '../hooks/useAuth';
 import { useSettingsStore } from '../store/settingsStore';
+import { useThemeStore } from '../store/themeStore';
 import { registerBackgroundFetch } from '../lib/notifications';
 import { useAppBlocker } from '../hooks/useAppBlocker';
 
@@ -13,10 +14,12 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const { load: loadSettings } = useSettingsStore();
+  const { theme, load: loadTheme } = useThemeStore();
   useAppBlocker();
 
   useEffect(() => {
     loadSettings();
+    loadTheme();
     registerBackgroundFetch();
   }, []);
 
@@ -40,9 +43,18 @@ export default function RootLayout() {
     );
   }
 
+  const paperTheme = {
+    ...MD3LightTheme,
+    colors: {
+      ...MD3LightTheme.colors,
+      primary: theme.accentColor,
+      secondary: theme.borderColor,
+    },
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <PaperProvider>
+      <PaperProvider theme={paperTheme}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="auth/login" />
