@@ -48,6 +48,11 @@ export function addBlockListener(listener: () => void): EventSubscription {
   return emitter?.addListener('onBlockDetected', listener) ?? { remove: () => {} };
 }
 
+/** 現在の解放期限（Unix ms）を返す。0 なら解放中ではない */
+export function getUnlockExpiry(): number {
+  return AppBlocker?.getUnlockExpiry() ?? 0;
+}
+
 /**
  * ガチャ報酬の解放期限を設定する（Unix ms）。
  * この時刻までブロック対象アプリを開いても監視サービスがスキップする。

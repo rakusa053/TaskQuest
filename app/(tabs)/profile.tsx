@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Surface, Avatar } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -10,11 +10,43 @@ import { CoinDisplay } from '../../components/gamification/CoinDisplay';
 import { BadgeCard } from '../../components/gamification/BadgeCard';
 import { Button } from '../../components/ui/Button';
 import { getAvatarLabel } from '../../utils/avatarUtils';
+import { getUnlockExpiry } from 'app-blocker';
+
+function useUnlockCountdown() {
+  const [remaining, setRemaining] = useState(0);
+
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const update = () => {
+      const expiry = getUnlockExpiry();
+      const left = Math.max(0, expiry - Date.now());
+      setRemaining(left);
+    };
+
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return remaining;
+}
+
+function formatCountdown(ms: number): string {
+  const totalSec = Math.ceil(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) return `${h}時間${m}分${s}秒`;
+  if (m > 0) return `${m}分${s}秒`;
+  return `${s}秒`;
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { profile, badges } = useProfile();
   const { logout } = useAuthStore();
+  const unlockRemaining = useUnlockCountdown();
 
   if (!profile) return null;
 
@@ -23,6 +55,15 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        {unlockRemaining > 0 && (
+          <Surface style={styles.unlockBanner}>
+            <Text style={styles.unlockEmoji}>🔓</Text>
+            <View style={styles.unlockText}>
+              <Text variant="labelMedium" style={styles.unlockLabel}>アプリ解放中</Text>
+              <Text variant="titleMedium" style={styles.unlockTimer}>{formatCountdown(unlockRemaining)}</Text>
+            </View>
+          </Surface>
+        )}
         {/* アバター & 基本情報 */}
         <Surface style={styles.card}>
           <View style={styles.avatarRow}>
@@ -96,6 +137,14 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9fafb' },
   content: { padding: 16, gap: 12 },
+  unlockBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    borderRadius: 16, padding: 14, backgroundColor: '#dcfce7',
+  },
+  unlockEmoji: { fontSize: 28 },
+  unlockText: { flex: 1 },
+  unlockLabel: { color: '#15803d', fontWeight: '600' },
+  unlockTimer: { color: '#166534', fontWeight: '700' },
   card: { borderRadius: 16, padding: 16, backgroundColor: '#fff', gap: 12 },
   avatarRow: { flexDirection: 'row', gap: 16, alignItems: 'center' },
   avatar: { backgroundColor: '#6366f1' },

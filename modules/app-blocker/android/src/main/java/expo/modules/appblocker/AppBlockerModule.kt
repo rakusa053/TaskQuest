@@ -112,6 +112,12 @@ class AppBlockerModule : Module() {
       }
     }
 
+    /** 現在の解放期限（Unix ms）を返す。0 なら解放中ではない */
+    Function("getUnlockExpiry") {
+      ctx.getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
+        .getLong("unlock_expires_at", 0L)
+    }
+
     /**
      * ガチャ報酬の解放期限を SharedPreferences に保存する。
      * AppBlockerService がこの値を参照してブロックをスキップする。
