@@ -47,6 +47,22 @@ export default function UseGachaScreen() {
         <Text variant="titleMedium" style={styles.title}>未使用の報酬</Text>
         <View style={{ width: 60 }} />
       </View>
+      {/* テスト用: 10秒解放 */}
+      <Surface style={styles.testCard}>
+        <Text variant="labelSmall" style={styles.testLabel}>🧪 テスト用</Text>
+        <View style={styles.row}>
+          <Text variant="bodyMedium" style={styles.testText}>10秒解放（無制限）</Text>
+          <Button
+            label="使う"
+            onPress={() => {
+              const expiresAt = Date.now() + 10_000;
+              setUnlockExpiry(expiresAt);
+              Alert.alert('テスト解放', '10秒間アプリを解放します');
+            }}
+          />
+        </View>
+      </Surface>
+
       <FlatList
         data={unused}
         keyExtractor={(item) => item.id}
@@ -83,4 +99,7 @@ const styles = StyleSheet.create({
   rarity: { fontSize: 12, fontWeight: '700' },
   minutes: { fontWeight: '700', color: '#1f2937' },
   sub: { color: '#9ca3af' },
+  testCard: { margin: 16, marginBottom: 0, borderRadius: 14, padding: 14, backgroundColor: '#fef9c3', gap: 4 },
+  testLabel: { color: '#92400e', fontWeight: '700' },
+  testText: { color: '#78350f' },
 });
