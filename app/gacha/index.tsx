@@ -43,10 +43,12 @@ export default function GachaScreen() {
       <View style={styles.content}>
         {lastSpinResult ? (
           <>
-            <GachaCard result={lastSpinResult} revealed={revealed} onReveal={() => setRevealed(true)} />
+            <GachaCard key={lastSpinResult.id} result={lastSpinResult} revealed={revealed} onReveal={() => setRevealed(true)} />
             {revealed && (
               <Text variant="bodyMedium" style={styles.hint}>
-                報酬は「報酬を使う」から選んで使用できます
+                {lastSpinResult.rarity === 'miss'
+                  ? `コイン ${lastSpinResult.rewardMoney ?? 50} 枚を獲得しました！`
+                  : '報酬は「報酬を使う」から選んで使用できます'}
               </Text>
             )}
           </>
