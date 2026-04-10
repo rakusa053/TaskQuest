@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
@@ -18,7 +18,10 @@ export default function RootLayout() {
   const segments = useSegments();
   const { load: loadSettings } = useSettingsStore();
   const { theme, load: loadTheme } = useThemeStore();
+  const [isLayoutReady, setIsLayoutReady] = useState(false);
   useAppBlocker();
+
+  useEffect(() => { setIsLayoutReady(true); }, []);
 
   useEffect(() => {
     loadSettings();
@@ -27,7 +30,7 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (!initialized) return;
+    if (!isLayoutReady || !initialized) return;
 
     const inAuthGroup = segments[0] === 'auth';
 
@@ -36,7 +39,7 @@ export default function RootLayout() {
     } else if (user && inAuthGroup) {
       router.replace('/blocked-apps');
     }
-  }, [user, initialized, segments]);
+  }, [isLayoutReady, user, initialized, segments]);
 
   if (!initialized) {
     return (
