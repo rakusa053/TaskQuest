@@ -1,5 +1,5 @@
 {
-  "name": "gamingtask-server",
+  "name": "taskqest-server",
   "version": "1.0.0",
   "scripts": {
     "dev": "tsx watch src/index.ts",

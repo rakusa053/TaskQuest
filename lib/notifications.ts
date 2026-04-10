@@ -24,7 +24,7 @@ export async function scheduleDailyReminder(hour = 12, minute = 0) {
   await Notifications.scheduleNotificationAsync({
     identifier: 'daily-reminder',
     content: {
-      title: 'GamingTask',
+      title: 'TaskQest',
       body: '今日のタスクをチェックしよう！ボスが待っています 🐉',
       sound: true,
     },

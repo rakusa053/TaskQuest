@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const STORAGE_KEY = 'gamingtask_blocked_packages';
+const STORAGE_KEY = 'taskqest_blocked_packages';
 
 interface BlockerState {
   blockedPackages: string[];

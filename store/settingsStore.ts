@@ -18,7 +18,7 @@ interface SettingsState {
   setLockEnabled: (enabled: boolean) => Promise<void>;
 }
 
-const SETTINGS_KEY = 'gamingtask_settings';
+const SETTINGS_KEY = 'taskqest_settings';
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   notificationsEnabled: false,

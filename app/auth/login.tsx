@@ -24,7 +24,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.inner}>
-        <Text variant="headlineLarge" style={styles.title}>GamingTask</Text>
+        <Text variant="headlineLarge" style={styles.title}>TaskQest</Text>
         <Text variant="bodyMedium" style={styles.sub}>ログイン</Text>
 
         <TextInput

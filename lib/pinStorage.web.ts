@@ -1,4 +1,4 @@
-const PIN_KEY = 'gamingtask_lock_pin';
+const PIN_KEY = 'taskqest_lock_pin';
 
 export async function savePin(pin: string): Promise<void> {
   localStorage.setItem(PIN_KEY, pin);

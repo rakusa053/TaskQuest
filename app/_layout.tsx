@@ -10,7 +10,7 @@ import { useThemeStore } from '../store/themeStore';
 import { registerBackgroundFetch } from '../lib/notifications';
 import { useAppBlocker } from '../hooks/useAppBlocker';
 
-const SETUP_DONE_KEY = 'gamingtask_blocker_setup_done';
+const SETUP_DONE_KEY = 'taskqest_blocker_setup_done';
 
 export default function RootLayout() {
   const { user, initialized } = useAuth();
