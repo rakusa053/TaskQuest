@@ -23,11 +23,17 @@ export function useAppBlocker(isLayoutReady = false) {
   const { blockedPackages, load, loaded } = useBlockerStore();
   const serviceRunning = useRef(false);
   const isMounted = useRef(false);
+  const isLayoutReadyRef = useRef(false);
 
   useEffect(() => {
     isMounted.current = true;
     return () => { isMounted.current = false; };
   }, []);
+
+  // isLayoutReady の最新値を ref に同期（closure 内で常に最新値を参照）
+  useEffect(() => {
+    isLayoutReadyRef.current = isLayoutReady;
+  }, [isLayoutReady]);
 
   // ストア読み込み
   useEffect(() => {
@@ -61,7 +67,7 @@ export function useAppBlocker(isLayoutReady = false) {
     if (Platform.OS !== 'android') return;
 
     const blockSub = addBlockListener(() => {
-      if (isMounted.current && isLayoutReady) router.replace('/lock');
+      if (isMounted.current && isLayoutReadyRef.current) router.replace('/lock');
     });
 
     return () => blockSub.remove();
@@ -72,7 +78,7 @@ export function useAppBlocker(isLayoutReady = false) {
     if (Platform.OS !== 'android') return;
 
     const tryLock = () => {
-      if (!isMounted.current || !isLayoutReady) return;
+      if (!isMounted.current || !isLayoutReadyRef.current) return;
       const pending = checkPendingLock();
       if (pending) router.replace('/lock');
     };
