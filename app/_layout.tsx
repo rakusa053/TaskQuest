@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -31,7 +31,8 @@ export default function RootLayout() {
     if (!user && !inAuthGroup) {
       router.replace('/auth/login');
     } else if (user && inAuthGroup) {
-      router.replace('/blocked-apps');
+      // Web はアプリブロック機能非対応なのでタブへ直接遷移
+      router.replace(Platform.OS === 'android' ? '/blocked-apps' : '/(tabs)');
     }
   }, [user, initialized, segments]);
 
