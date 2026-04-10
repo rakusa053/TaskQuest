@@ -1,6 +1,6 @@
 # 勉強タスク管理アプリ 実装計画
 
-最終更新: 2026-04-10（**ver.9 完成** / git tag: v9.0）
+最終更新: 2026-04-10（**ver.10 完成** / git tag: v10.0）
 
 ## Context
 
@@ -364,6 +364,17 @@ useAuth / useTasks / useStats / useCalendarData / useProfile / useGacha / useBos
 - フォーカスモード UI（ロック画面）
 - 設定画面でフォーカスモード ON/OFF
 - PIN削除 → 「タスクに集中しましょう」＋「タスク画面に戻る」ボタンに変更
+
+---
+
+## ✅ ver.10 完成（2026-04-10 / git tag: v10.0）
+
+ver.10 タイトル：**Web デプロイ改善・名前変更**
+
+ver.10 で追加・修正した機能：
+- **ログイン・登録画面のタイトルを TaskQest に変更**
+- **Web を Docker 内でビルドする構成に変更**: `Dockerfile.web` を追加し、`git pull && docker compose up --build -d` だけで Web・API 両方が更新されるよう改善
+- **初回ログイン時にアプリロック設定画面へ遷移**: AsyncStorage フラグで初回のみ `/blocked-apps` にリダイレクト
 
 ---
 
