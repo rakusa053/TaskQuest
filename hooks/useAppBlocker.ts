@@ -22,6 +22,12 @@ export function useAppBlocker() {
   const { lockEnabled } = useSettingsStore();
   const { blockedPackages, load, loaded } = useBlockerStore();
   const serviceRunning = useRef(false);
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
 
   // ストア読み込み
   useEffect(() => {
@@ -55,7 +61,7 @@ export function useAppBlocker() {
     if (Platform.OS !== 'android') return;
 
     const blockSub = addBlockListener(() => {
-      router.replace('/lock');
+      if (isMounted.current) router.replace('/lock');
     });
 
     return () => blockSub.remove();
@@ -66,6 +72,7 @@ export function useAppBlocker() {
     if (Platform.OS !== 'android') return;
 
     const tryLock = () => {
+      if (!isMounted.current) return;
       const pending = checkPendingLock();
       if (pending) router.replace('/lock');
     };
