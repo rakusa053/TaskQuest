@@ -6,7 +6,7 @@ ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
 
 # 依存関係をインストール
 COPY package*.json ./
-RUN npm install
+RUN npm install --ignore-scripts
 
 # ソースをコピーしてWebビルド
 COPY . .
