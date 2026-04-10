@@ -19,7 +19,7 @@ export default function RootLayout() {
   const { load: loadSettings } = useSettingsStore();
   const { theme, load: loadTheme } = useThemeStore();
   const [isLayoutReady, setIsLayoutReady] = useState(false);
-  useAppBlocker();
+  useAppBlocker(isLayoutReady);
 
   useEffect(() => { setIsLayoutReady(true); }, []);
 

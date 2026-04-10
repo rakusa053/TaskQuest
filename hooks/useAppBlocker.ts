@@ -17,7 +17,7 @@ import {
  * - AppState が active になるたびに checkPendingLock() を確認し、
  *   ブロックされたアプリから戻ってきた場合にロック画面へ誘導
  */
-export function useAppBlocker() {
+export function useAppBlocker(isLayoutReady = false) {
   const router = useRouter();
   const { lockEnabled } = useSettingsStore();
   const { blockedPackages, load, loaded } = useBlockerStore();
@@ -61,7 +61,7 @@ export function useAppBlocker() {
     if (Platform.OS !== 'android') return;
 
     const blockSub = addBlockListener(() => {
-      if (isMounted.current) router.replace('/lock');
+      if (isMounted.current && isLayoutReady) router.replace('/lock');
     });
 
     return () => blockSub.remove();
@@ -72,7 +72,7 @@ export function useAppBlocker() {
     if (Platform.OS !== 'android') return;
 
     const tryLock = () => {
-      if (!isMounted.current) return;
+      if (!isMounted.current || !isLayoutReady) return;
       const pending = checkPendingLock();
       if (pending) router.replace('/lock');
     };
