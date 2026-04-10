@@ -3,11 +3,14 @@ import { View, ActivityIndicator } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../hooks/useAuth';
 import { useSettingsStore } from '../store/settingsStore';
 import { useThemeStore } from '../store/themeStore';
 import { registerBackgroundFetch } from '../lib/notifications';
 import { useAppBlocker } from '../hooks/useAppBlocker';
+
+const SETUP_DONE_KEY = 'gamingtask_blocker_setup_done';
 
 export default function RootLayout() {
   const { user, initialized } = useAuth();
@@ -31,7 +34,15 @@ export default function RootLayout() {
     if (!user && !inAuthGroup) {
       router.replace('/auth/login');
     } else if (user && inAuthGroup) {
-      router.replace('/(tabs)');
+      AsyncStorage.getItem(SETUP_DONE_KEY).then((done) => {
+        if (!done) {
+          AsyncStorage.setItem(SETUP_DONE_KEY, '1');
+          router.replace('/(tabs)');
+          setTimeout(() => router.push('/blocked-apps'), 300);
+        } else {
+          router.replace('/(tabs)');
+        }
+      });
     }
   }, [user, initialized, segments]);
 
