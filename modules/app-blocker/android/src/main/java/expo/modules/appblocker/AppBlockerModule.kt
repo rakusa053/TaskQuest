@@ -157,7 +157,7 @@ class AppBlockerModule : Module() {
 
     /** 現在の解放期限（Unix ms）を返す。0 なら解放中ではない */
     Function("getUnlockExpiry") {
-      ctx.getSharedPreferences("taskqest_blocker", Context.MODE_PRIVATE)
+      ctx.getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
         .getLong("unlock_expires_at", 0L)
     }
 
@@ -167,7 +167,7 @@ class AppBlockerModule : Module() {
      */
     Function("setUnlockExpiry") { expiresAt: Long ->
       Log.d("AppBlocker", "setUnlockExpiry: $expiresAt")
-      ctx.getSharedPreferences("taskqest_blocker", Context.MODE_PRIVATE)
+      ctx.getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
         .edit().putLong("unlock_expires_at", expiresAt).apply()
     }
 
@@ -177,7 +177,7 @@ class AppBlockerModule : Module() {
      * AppState active 時に React Native から呼ぶ。
      */
     Function("checkPendingLock") {
-      val prefs = ctx.getSharedPreferences("taskqest_blocker", Context.MODE_PRIVATE)
+      val prefs = ctx.getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
       val pending = prefs.getBoolean("show_lock", false)
       if (pending) prefs.edit().putBoolean("show_lock", false).apply()
       pending

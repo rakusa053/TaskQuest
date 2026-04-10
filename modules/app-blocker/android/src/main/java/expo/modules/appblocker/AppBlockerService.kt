@@ -21,8 +21,8 @@ class AppBlockerService : Service() {
   companion object {
     const val NOTIFICATION_ID = 7777
     const val ALERT_NOTIFICATION_ID = 7778
-    const val CHANNEL_ID = "taskqest_blocker"
-    const val ALERT_CHANNEL_ID = "taskqest_blocker_alert"
+    const val CHANNEL_ID = "gamingtask_blocker"
+    const val ALERT_CHANNEL_ID = "gamingtask_blocker_alert"
   }
 
   override fun onBind(intent: Intent?): IBinder? = null
@@ -75,7 +75,7 @@ class AppBlockerService : Service() {
     }
     if (foreground in blockedPackages) {
       // 解放タイマーが有効な間はブロックしない
-      val prefs = getSharedPreferences("taskqest_blocker", Context.MODE_PRIVATE)
+      val prefs = getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
       val unlockExpiresAt = prefs.getLong("unlock_expires_at", 0L)
       if (System.currentTimeMillis() < unlockExpiresAt) {
         Log.d("AppBlocker", "Unlock active until $unlockExpiresAt, skipping block")
@@ -116,7 +116,7 @@ class AppBlockerService : Service() {
    */
   private fun setPendingLock() {
     // SharedPreferences（フォールバック用）
-    getSharedPreferences("taskqest_blocker", Context.MODE_PRIVATE)
+    getSharedPreferences("gamingtask_blocker", Context.MODE_PRIVATE)
       .edit().putBoolean("show_lock", true).apply()
     // Expo イベントで JS に直接通知（より確実）
     AppBlockerModule.emitBlockDetected?.invoke()

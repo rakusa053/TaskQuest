@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-const PIN_KEY = 'taskqest_lock_pin';
+const PIN_KEY = 'gamingtask_lock_pin';
 
 export async function savePin(pin: string): Promise<void> {
   await SecureStore.setItemAsync(PIN_KEY, pin);

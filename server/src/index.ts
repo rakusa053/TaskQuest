@@ -18,7 +18,7 @@ const app = new Hono();
 app.use('*', logger());
 app.use('*', cors());
 
-app.get('/', (c) => c.json({ status: 'ok', message: 'taskqest API v1' }));
+app.get('/', (c) => c.json({ status: 'ok', message: 'gamingtask API v1' }));
 
 app.route('/api/tasks', tasksRoute);
 app.route('/api/subjects', subjectsRoute);

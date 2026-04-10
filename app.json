@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "TaskQest",
-    "slug": "taskqest",
-    "scheme": "taskqest",
+    "name": "gamingtask",
+    "slug": "gamingtask",
+    "scheme": "gamingtask",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -30,7 +30,7 @@
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.WAKE_LOCK"
       ],
-      "package": "com.rakusa053.taskqest"
+      "package": "com.rakusa053.gamingtask"
     },
     "web": {
       "favicon": "./assets/favicon.png",

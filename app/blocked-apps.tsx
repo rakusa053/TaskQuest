@@ -88,7 +88,7 @@ export default function BlockedAppsScreen() {
         <View style={styles.permBox}>
           <Text variant="titleSmall" style={styles.permTitle}>権限が必要です</Text>
           <Text variant="bodyMedium" style={styles.permText}>
-            「使用状況へのアクセス」で TaskQest をオンにしてください。
+            「使用状況へのアクセス」で GamingTask をオンにしてください。
           </Text>
           <Button label="使用状況の設定を開く →" onPress={handleRequestPermission} />
           <Button

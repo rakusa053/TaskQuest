@@ -11,7 +11,7 @@ export const PRESET_THEMES: AppTheme[] = [
   { id: 'theme_gold',     name: 'ゴールド',   accentColor: '#ca8a04', bgColor: '#fef9c3', borderColor: '#facc15' },
 ];
 
-const STORAGE_KEY = 'taskqest_theme';
+const STORAGE_KEY = 'gamingtask_theme';
 
 interface ThemeState {
   activeThemeId: string;
