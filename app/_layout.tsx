@@ -34,15 +34,8 @@ export default function RootLayout() {
     if (!user && !inAuthGroup) {
       router.replace('/auth/login');
     } else if (user && inAuthGroup) {
-      AsyncStorage.getItem(SETUP_DONE_KEY).then((done) => {
-        if (!done) {
-          AsyncStorage.setItem(SETUP_DONE_KEY, '1');
-          router.replace('/(tabs)');
-          setTimeout(() => router.push('/blocked-apps'), 300);
-        } else {
-          router.replace('/(tabs)');
-        }
-      });
+      router.replace('/(tabs)');
+      setTimeout(() => router.push('/blocked-apps'), 300);
     }
   }, [user, initialized, segments]);
 
