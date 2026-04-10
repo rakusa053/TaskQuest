@@ -1,6 +1,6 @@
 # 勉強タスク管理アプリ 実装計画
 
-最終更新: 2026-04-10（**ver.10 完成** / git tag: v10.0）
+最終更新: 2026-04-10（**ver.11 完成** / git tag: v11.0）
 
 ## Context
 
@@ -364,6 +364,20 @@ useAuth / useTasks / useStats / useCalendarData / useProfile / useGacha / useBos
 - フォーカスモード UI（ロック画面）
 - 設定画面でフォーカスモード ON/OFF
 - PIN削除 → 「タスクに集中しましょう」＋「タスク画面に戻る」ボタンに変更
+
+---
+
+## ✅ ver.11 完成（2026-04-10 / git tag: v11.0）
+
+ver.11 タイトル：**バグ修正・安定化**
+
+ver.11 で追加・修正した機能：
+- **Root Layout マウントエラー修正**: Expo Router の「navigate before mounting」エラーを解消。`<Stack>` を常に描画しローディングはオーバーレイで表示する構成に変更
+- **フォーカスモード（アプリブロック）復活**: `isLayoutReady` の stale closure 問題を ref で修正し、ロック画面への遷移が正常動作するよう修正
+- **レベルアップ後 FAB が押せない問題修正**: React Native `Modal` の Portal 残留によるタッチブロックを解消。`absoluteFillObject` の通常 View に置き換え
+- **報酬タイマーをタスク画面にも表示**: ガチャ解放中のカウントダウンをメインのタスク画面ヘッダーにも追加（プロフィール画面に加えて）
+- **プレミアムアバター反映修正**: `AVATAR_MAP` にプレミアムアバター6種を追加。選択後もアイコンが変わらない問題を解消
+- **Web ログイン後の画面遷移修正**: Web では `/blocked-apps`（Android 専用）ではなく `/(tabs)` に直接遷移するよう修正。Web で抜け出せなくなる問題を解消
 
 ---
 
