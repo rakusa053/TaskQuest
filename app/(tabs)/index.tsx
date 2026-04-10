@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, StyleSheet, RefreshControl, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, FAB } from 'react-native-paper';
+import { Text, FAB, Surface } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useTasks } from '../../hooks/useTasks';
 import { useSubjectStore } from '../../store/subjectStore';
@@ -12,10 +12,37 @@ import { LevelUpModal } from '../../components/gamification/LevelUpModal';
 import { XPPopup } from '../../components/gamification/XPPopup';
 import { Snackbar } from '../../components/ui/Snackbar';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { getUnlockExpiry } from 'app-blocker';
 import type { Task } from '../../types';
+
+function useUnlockCountdown() {
+  const [remaining, setRemaining] = useState(0);
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const update = () => {
+      const expiry = getUnlockExpiry();
+      setRemaining(Math.max(0, expiry - Date.now()));
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, []);
+  return remaining;
+}
+
+function formatCountdown(ms: number): string {
+  const totalSec = Math.ceil(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) return `${h}時間${m}分${s}秒`;
+  if (m > 0) return `${m}分${s}秒`;
+  return `${s}秒`;
+}
 
 export default function TasksScreen() {
   const router = useRouter();
+  const unlockRemaining = useUnlockCountdown();
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [popup, setPopup] = useState<{ xp: number; money: number; damage: number } | null>(null);
@@ -60,6 +87,16 @@ export default function TasksScreen() {
       <View style={styles.header}>
         <Text variant="headlineSmall" style={styles.title}>タスク</Text>
       </View>
+
+      {unlockRemaining > 0 && (
+        <Surface style={styles.unlockBanner}>
+          <Text style={styles.unlockEmoji}>🔓</Text>
+          <View style={styles.unlockText}>
+            <Text variant="labelMedium" style={styles.unlockLabel}>アプリ解放中</Text>
+            <Text variant="titleSmall" style={styles.unlockTimer}>{formatCountdown(unlockRemaining)}</Text>
+          </View>
+        </Surface>
+      )}
 
       <TaskFilterBar
         subjects={subjects}
@@ -122,4 +159,13 @@ const styles = StyleSheet.create({
   title: { color: '#1f2937', fontWeight: '700' },
   list: { padding: 16, paddingBottom: 100 },
   fab: { position: 'absolute', right: 16, bottom: 24, backgroundColor: '#6366f1' },
+  unlockBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    marginHorizontal: 16, marginTop: 8, borderRadius: 12,
+    padding: 12, backgroundColor: '#dcfce7',
+  },
+  unlockEmoji: { fontSize: 22 },
+  unlockText: { flex: 1 },
+  unlockLabel: { color: '#15803d', fontWeight: '600' },
+  unlockTimer: { color: '#166534', fontWeight: '700' },
 });
