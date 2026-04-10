@@ -1,0 +1,17 @@
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+ARG EXPO_PUBLIC_API_URL=http://163.44.110.220
+ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
+
+# 依存関係をインストール
+COPY package*.json ./
+RUN npm install
+
+# ソースをコピーしてWebビルド
+COPY . .
+RUN npx expo export --platform web
+
+FROM caddy:2-alpine
+COPY --from=builder /app/dist /var/www/html
+COPY server/Caddyfile /etc/caddy/Caddyfile

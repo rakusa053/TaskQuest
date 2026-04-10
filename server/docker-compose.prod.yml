@@ -1,11 +1,13 @@
 services:
   caddy:
-    image: caddy:2-alpine
+    build:
+      context: ..
+      dockerfile: server/Dockerfile.web
+      args:
+        EXPO_PUBLIC_API_URL: http://163.44.110.220
     ports:
       - "80:80"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ../dist:/var/www/html        # Expo web ビルド成果物（なくても API は動作する）
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
