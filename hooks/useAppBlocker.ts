@@ -55,7 +55,7 @@ export function useAppBlocker() {
     if (Platform.OS !== 'android') return;
 
     const blockSub = addBlockListener(() => {
-      router.push('/lock');
+      router.replace('/lock');
     });
 
     return () => blockSub.remove();
@@ -67,7 +67,7 @@ export function useAppBlocker() {
 
     const tryLock = () => {
       const pending = checkPendingLock();
-      if (pending) router.push('/lock');
+      if (pending) router.replace('/lock');
     };
 
     const appStateSub = AppState.addEventListener('change', (state) => {
