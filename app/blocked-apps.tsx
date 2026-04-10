@@ -79,7 +79,7 @@ export default function BlockedAppsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Button label="戻る" onPress={() => router.back()} mode="text" />
+        <Button label="戻る" onPress={() => router.canGoBack() ? router.back() : router.replace('/(tabs)')} mode="text" />
         <Text variant="titleMedium" style={styles.title}>ブロックするアプリ</Text>
         <View style={{ width: 60 }} />
       </View>

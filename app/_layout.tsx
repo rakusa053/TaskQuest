@@ -34,8 +34,7 @@ export default function RootLayout() {
     if (!user && !inAuthGroup) {
       router.replace('/auth/login');
     } else if (user && inAuthGroup) {
-      router.replace('/(tabs)');
-      setTimeout(() => router.push('/blocked-apps'), 300);
+      router.replace('/blocked-apps');
     }
   }, [user, initialized, segments]);
 
