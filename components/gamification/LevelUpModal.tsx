@@ -10,7 +10,7 @@ interface Props {
 
 export function LevelUpModal({ level, onClose }: Props) {
   return (
-    <Modal visible={!!level} transparent animationType="fade">
+    <Modal visible transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.card}>
           <Text style={styles.emoji}>⬆️</Text>

@@ -147,7 +147,7 @@ export default function TasksScreen() {
         />
       )}
 
-      <LevelUpModal level={lastLevelUp} onClose={clearLevelUp} />
+      {lastLevelUp !== null && <LevelUpModal level={lastLevelUp} onClose={clearLevelUp} />}
       <Snackbar message={snackbar?.msg ?? null} type={snackbar?.type} onDismiss={() => setSnackbar(null)} />
     </SafeAreaView>
   );
