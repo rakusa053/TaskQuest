@@ -1,6 +1,6 @@
 # 勉強タスク管理アプリ 実装計画
 
-最終更新: 2026-04-09（**ver.8 完成** / git tag: v8.0）
+最終更新: 2026-04-10（**ver.9 完成** / git tag: v9.0）
 
 ## Context
 
@@ -364,6 +364,18 @@ useAuth / useTasks / useStats / useCalendarData / useProfile / useGacha / useBos
 - フォーカスモード UI（ロック画面）
 - 設定画面でフォーカスモード ON/OFF
 - PIN削除 → 「タスクに集中しましょう」＋「タスク画面に戻る」ボタンに変更
+
+---
+
+## ✅ ver.9 完成（2026-04-10 / git tag: v9.0）
+
+ver.9 タイトル：**アイコン・SNS・パーティ修正**
+
+ver.9 で追加・修正した機能：
+- **ブロックアプリ画面にアイコン表示**: `getInstalledApps()` でアプリアイコンをBase64 PNG取得・表示。AdaptiveIconDrawable（Android 8+）を108px描画→72px切り抜きで正しく描画
+- **SNS表示名修正**: フィード取得時にプロフィールの現在のdisplayNameで上書き。古い投稿でも正しい名前が表示される
+- **登録時ニックネーム即時反映**: `signUp` 完了後に `profileApi.init` の結果を直接 `profileStore` にセットし、タブ遷移との競合を解消
+- **パーティ「参加していません」誤表示修正**: `useParty.fetch()` にエラーハンドリング追加、joinレスポンスのデータ不整合修正、再読み込みボタン追加
 
 ---
 
