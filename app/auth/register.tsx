@@ -27,7 +27,7 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.inner}>
-        <Text variant="headlineLarge" style={styles.title}>TaskQest</Text>
+        <Text variant="headlineLarge" style={styles.title}>TaskQuest</Text>
         <Text variant="bodyMedium" style={styles.sub}>新規登録</Text>
 
         <TextInput

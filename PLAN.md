@@ -396,7 +396,7 @@ ver.11 で追加・修正した機能：
 ver.10 タイトル：**Web デプロイ改善・名前変更**
 
 ver.10 で追加・修正した機能：
-- **ログイン・登録画面のタイトルを TaskQest に変更**
+- **ログイン・登録画面のタイトルを TaskQuest に変更**
 - **Web を Docker 内でビルドする構成に変更**: `Dockerfile.web` を追加し、`git pull && docker compose up --build -d` だけで Web・API 両方が更新されるよう改善
 - **初回ログイン時にアプリロック設定画面へ遷移**: AsyncStorage フラグで初回のみ `/blocked-apps` にリダイレクト
 
